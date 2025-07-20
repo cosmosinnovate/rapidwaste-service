@@ -13,7 +13,7 @@ export class AuthController {
   @Post('login')
   @ApiOperation({
     summary: 'User login',
-    description: 'Authenticates a user (customer or driver) and returns a JWT token for API access.',
+    description: 'Authenticates a user (customer or driver) and returns JWT tokens for API access.',
   })
   @ApiBody({
     type: LoginDto,
@@ -45,6 +45,7 @@ export class AuthController {
       message: 'Login successful',
       data: {
         access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
         user: {
           id: '507f1f77bcf86cd799439011',
           email: 'driver@rapidwaste.com',
@@ -78,7 +79,7 @@ export class AuthController {
   @Post('register')
   @ApiOperation({
     summary: 'User registration',
-    description: 'Creates a new user account (customer or driver) and returns a JWT token.',
+    description: 'Creates a new user account (customer or driver) and returns JWT tokens.',
   })
   @ApiBody({
     type: RegisterDto,
@@ -121,6 +122,7 @@ export class AuthController {
       message: 'Registration successful',
       data: {
         access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
         user: {
           id: '507f1f77bcf86cd799439011',
           email: 'jane.doe@example.com',
@@ -154,6 +156,64 @@ export class AuthController {
     return {
       success: true,
       message: 'Registration successful',
+      data: result,
+    };
+  }
+
+  @Public()
+  @Post('refresh')
+  @ApiOperation({
+    summary: 'Refresh access token',
+    description: 'Uses a refresh token to get a new access token without requiring login.',
+  })
+  @ApiBody({
+    description: 'Refresh token',
+    schema: {
+      type: 'object',
+      properties: {
+        refresh_token: {
+          type: 'string',
+          description: 'Valid refresh token',
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        },
+      },
+      required: ['refresh_token'],
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Token refreshed successfully',
+    example: {
+      success: true,
+      message: 'Token refreshed successfully',
+      data: {
+        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        user: {
+          id: '507f1f77bcf86cd799439011',
+          email: 'driver@rapidwaste.com',
+          firstName: 'John',
+          lastName: 'Driver',
+          role: 'driver',
+          driverId: 'D0001',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid refresh token',
+    example: {
+      success: false,
+      message: 'Invalid refresh token',
+    },
+  })
+  async refresh(@Body() body: { refresh_token: string }) {
+    const result = await this.authService.refreshToken(body.refresh_token);
+    
+    return {
+      success: true,
+      message: 'Token refreshed successfully',
       data: result,
     };
   }

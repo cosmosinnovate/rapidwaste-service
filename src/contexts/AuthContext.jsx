@@ -22,18 +22,23 @@ export const AuthProvider = ({ children }) => {
     const initializeAuth = () => {
       try {
         const storedToken = localStorage.getItem('rapidwaste_token');
+        const storedRefreshToken = localStorage.getItem('rapidwaste_refresh_token');
         const storedUser = localStorage.getItem('rapidwaste_user');
         
         if (storedToken && storedUser) {
           setToken(storedToken);
           setUser(JSON.parse(storedUser));
-          // Set auth token for API service
+          // Set auth tokens for API service
           apiService.setAuthToken(storedToken);
+          if (storedRefreshToken) {
+            apiService.setRefreshToken(storedRefreshToken);
+          }
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
         // Clear invalid data
         localStorage.removeItem('rapidwaste_token');
+        localStorage.removeItem('rapidwaste_refresh_token');
         localStorage.removeItem('rapidwaste_user');
       } finally {
         setLoading(false);
@@ -41,6 +46,22 @@ export const AuthProvider = ({ children }) => {
     };
 
     initializeAuth();
+  }, []);
+
+  // Listen for automatic logout events from API service
+  useEffect(() => {
+    const handleAutoLogout = () => {
+      console.log('Auto logout triggered due to refresh token failure');
+      setUser(null);
+      setToken(null);
+      setError('');
+    };
+
+    window.addEventListener('auth-logout', handleAutoLogout);
+    
+    return () => {
+      window.removeEventListener('auth-logout', handleAutoLogout);
+    };
   }, []);
 
   const login = async (email, password) => {
@@ -51,7 +72,7 @@ export const AuthProvider = ({ children }) => {
       const response = await apiService.login(email, password);
 
       if (response.success) {
-        const { access_token, user: userData } = response.data;
+        const { access_token, refresh_token, user: userData } = response.data;
         
         // Store in state
         setToken(access_token);
@@ -59,10 +80,12 @@ export const AuthProvider = ({ children }) => {
         
         // Store in localStorage
         localStorage.setItem('rapidwaste_token', access_token);
+        localStorage.setItem('rapidwaste_refresh_token', refresh_token);
         localStorage.setItem('rapidwaste_user', JSON.stringify(userData));
         
-        // Set auth token for API service
+        // Set auth tokens for API service
         apiService.setAuthToken(access_token);
+        apiService.setRefreshToken(refresh_token);
         
         return { success: true, user: userData };
       } else {
@@ -85,7 +108,7 @@ export const AuthProvider = ({ children }) => {
       const response = await apiService.register(userData);
 
       if (response.success) {
-        const { access_token, user: newUser } = response.data;
+        const { access_token, refresh_token, user: newUser } = response.data;
         
         // Store in state
         setToken(access_token);
@@ -93,10 +116,12 @@ export const AuthProvider = ({ children }) => {
         
         // Store in localStorage
         localStorage.setItem('rapidwaste_token', access_token);
+        localStorage.setItem('rapidwaste_refresh_token', refresh_token);
         localStorage.setItem('rapidwaste_user', JSON.stringify(newUser));
         
-        // Set auth token for API service
+        // Set auth tokens for API service
         apiService.setAuthToken(access_token);
+        apiService.setRefreshToken(refresh_token);
         
         return { success: true, user: newUser };
       } else {
@@ -119,9 +144,10 @@ export const AuthProvider = ({ children }) => {
     
     // Clear localStorage
     localStorage.removeItem('rapidwaste_token');
+    localStorage.removeItem('rapidwaste_refresh_token');
     localStorage.removeItem('rapidwaste_user');
     
-    // Remove auth token from API service
+    // Remove auth tokens from API service
     apiService.clearAuthToken();
   };
 

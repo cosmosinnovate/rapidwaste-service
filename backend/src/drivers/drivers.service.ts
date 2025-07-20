@@ -161,23 +161,28 @@ export class DriversService {
       .populate('userId', 'firstName lastName email phone driverId role')
       .exec();
 
-    // Format the response to include user and driver details
-    return drivers.map(driver => ({
-      _id: driver.userId._id,
-      firstName: driver.userId.firstName,
-      lastName: driver.userId.lastName,
-      email: driver.userId.email,
-      phone: driver.userId.phone,
-      role: driver.userId.role,
-      driverId: driver.userId.driverId || driver.driverId,
-      status: driver.status,
-      vehicleInfo: driver.vehicleInfo,
-      workingHours: driver.workingHours,
-      workingDays: driver.workingDays,
-      isActive: driver.isActive,
-      createdAt: driver.createdAt,
-      updatedAt: driver.updatedAt,
-    }));
+    // Format the response to include user and driver details with proper typing
+    return drivers.map(driver => {
+      const populatedDriver = driver as any; // Type assertion for populated document
+      const user = populatedDriver.userId as any; // Type assertion for populated user
+      
+      return {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        driverId: user.driverId || populatedDriver.driverId,
+        status: populatedDriver.status,
+        vehicleInfo: populatedDriver.vehicleInfo,
+        workingHours: populatedDriver.workingHours,
+        workingDays: populatedDriver.workingDays,
+        isActive: populatedDriver.isActive,
+        createdAt: populatedDriver.createdAt,
+        updatedAt: populatedDriver.updatedAt,
+      };
+    });
   }
 
   async createDriver(userData: any, driverData: any): Promise<Driver> {
