@@ -78,11 +78,20 @@ export class Booking {
   @Prop()
   actualPrice?: number;
 
-  @Prop()
-  paymentStatus?: string;
+  @Prop({ 
+    enum: ['pending', 'paid', 'failed', 'refunded'], 
+    default: 'pending' 
+  })
+  paymentStatus: string;
 
   @Prop()
   paymentMethod?: string;
+
+  @Prop()
+  stripePaymentIntentId?: string;
+
+  @Prop()
+  stripeCustomerId?: string;
 
   @Prop()
   completedAt?: Date;

@@ -5,7 +5,9 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { DriversModule } from './drivers/drivers.module';
+import { PaymentsModule } from './payments/payments.module';
 import { BookingsGateway } from './gateways/bookings.gateway';
+
 
 @Module({
   imports: [
@@ -19,6 +21,7 @@ import { BookingsGateway } from './gateways/bookings.gateway';
     UsersModule,
     BookingsModule,
     DriversModule,
+    PaymentsModule,
   ],
   providers: [BookingsGateway],
 })

@@ -321,6 +321,36 @@ class ApiService {
   async getAllUsers() {
     return this.request('/users');
   }
+
+  // Payment methods
+  async createPaymentIntent(bookingId) {
+    return this.request(`/payments/create-intent/${bookingId}`, {
+      method: 'POST',
+    });
+  }
+
+  async confirmPayment(paymentIntentId) {
+    return this.request(`/payments/confirm/${paymentIntentId}`, {
+      method: 'POST',
+    });
+  }
+
+  async getPaymentStatus(bookingId) {
+    return this.request(`/payments/status/${bookingId}`);
+  }
+
+  async refundPayment(bookingId, amount) {
+    return this.request(`/payments/refund/${bookingId}`, {
+      method: 'POST',
+      body: JSON.stringify({ amount }),
+    });
+  }
+
+  async createCustomerPortalSession() {
+    return this.request('/payments/customer-portal', {
+      method: 'POST',
+    });
+  }
 }
 
 export default new ApiService(); 

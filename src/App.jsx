@@ -3,7 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import Services from './components/Services'
-import BookingForm from './components/BookingForm'
+import BookingFormWithPayment from './components/BookingFormWithPayment'
 import Footer from './components/Footer'
 import DriverDashboard from './components/DriverDashboard'
 import AdminDashboard from './components/AdminDashboard'
@@ -44,7 +44,7 @@ function AppContent() {
           <main>
             <Hero />
             <Services />
-            <BookingForm />
+            <BookingFormWithPayment />
           </main>
           <Footer />
           

@@ -92,8 +92,9 @@ FRONTEND_URL=http://localhost:5173
 ## 📊 Sample Data
 
 The seed script creates:
+- 1 sample admin (admin@rapidwaste.com / admin123)
 - 1 sample driver (driver@rapidwaste.com / password123)
-- 4 sample bookings with different service types
+- 10 sample bookings with different service types
 - Test customers for booking relationships
 
 ## 🚀 Deployment

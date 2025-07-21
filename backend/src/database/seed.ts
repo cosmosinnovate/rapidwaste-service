@@ -271,6 +271,7 @@ async function seed() {
 
     console.log('🎉 Database seeded successfully!');
     console.log('\n📋 Sample Data Available:');
+    console.log('- Admin: admin@rapidwaste.com / admin123');
     console.log('- Driver: driver@rapidwaste.com / password123');
     console.log('- Sample bookings with different service types');
     console.log('\n🚀 You can now start the backend server!');

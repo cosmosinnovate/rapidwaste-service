@@ -1,12 +1,186 @@
-# React + Vite
+# 🚛 RapidWaste - Emergency Waste Pickup Service
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack web application for emergency waste pickup services with real-time booking, driver management, and payment processing.
 
-Currently, two official plugins are available:
+## 🚀 Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Prerequisites
+- Node.js 18+
+- MongoDB
+- npm or yarn
 
-## Expanding the ESLint configuration
+### Installation
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+# Clone the repository
+git clone <repository-url>
+cd rapidwaste-service
+
+# Install dependencies
+npm install
+cd backend && npm install
+
+# Set up environment variables
+cp backend/.env.example backend/.env
+# Edit backend/.env with your MongoDB connection string
+
+# Start MongoDB (if running locally)
+mongod
+
+# Seed the database with sample data
+cd backend && npm run seed
+
+# Start the development servers
+./start-dev.sh
+```
+
+## 🔑 Test Login Credentials
+
+### Admin Dashboard
+- **Email:** admin@rapidwaste.com
+- **Password:** admin123
+
+### Driver Dashboard  
+- **Email:** driver@rapidwaste.com
+- **Password:** password123
+
+## 🌟 Features
+
+### Customer Features
+- ✅ **Emergency Booking** - Same-day waste pickup
+- ✅ **Service Types** - Regular, Emergency, Bulk removal
+- ✅ **Real-time Pricing** - Dynamic cost calculation
+- ✅ **Payment Processing** - Secure Stripe integration
+- ✅ **Booking Tracking** - Status updates and notifications
+
+### Admin Features
+- ✅ **Dashboard Overview** - Booking statistics and metrics
+- ✅ **Driver Management** - Assign and monitor drivers
+- ✅ **Booking Management** - Update status and track progress
+- ✅ **Payment Management** - Process refunds and view payments
+- ✅ **Customer Portal** - Manage customer accounts
+
+### Driver Features
+- ✅ **Real-time Dashboard** - Live booking updates
+- ✅ **Route Optimization** - Efficient pickup scheduling
+- ✅ **Status Updates** - Mark pickups as completed
+- ✅ **Earnings Tracking** - Daily and weekly statistics
+
+## 🛠️ Tech Stack
+
+### Frontend
+- **React 18** - Modern UI framework
+- **Vite** - Fast development and building
+- **Tailwind CSS** - Utility-first styling
+- **Stripe Elements** - Secure payment processing
+
+### Backend
+- **NestJS** - Scalable Node.js framework
+- **MongoDB** - Document database
+- **Mongoose** - MongoDB object modeling
+- **JWT** - Authentication and authorization
+- **WebSockets** - Real-time communication
+
+### Payment
+- **Stripe** - Payment processing and security
+- **PCI Compliance** - Industry-standard security
+
+## 📱 Application Structure
+
+```
+rapidwaste-service/
+├── src/                    # Frontend React app
+│   ├── components/        # React components
+│   ├── contexts/          # React contexts
+│   └── services/          # API services
+├── backend/               # NestJS backend
+│   ├── src/
+│   │   ├── auth/         # Authentication
+│   │   ├── bookings/     # Booking management
+│   │   ├── drivers/      # Driver management
+│   │   ├── payments/     # Payment processing
+│   │   └── users/        # User management
+│   └── database/         # MongoDB schemas
+└── start-dev.sh          # Development startup script
+```
+
+## 🔧 Environment Variables
+
+### Backend (.env)
+```env
+NODE_ENV=development
+PORT=3001
+MONGODB_URI=mongodb://localhost:27017/rapidwaste
+JWT_SECRET=your-secret-key
+STRIPE_SECRET_KEY=sk_test_your_stripe_key
+FRONTEND_URL=http://localhost:5173
+```
+
+### Frontend (.env)
+```env
+VITE_API_BASE_URL=http://localhost:3001/api
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_key
+```
+
+## 🚀 Development
+
+```bash
+# Start both frontend and backend
+./start-dev.sh
+
+# Or start individually
+npm run dev              # Frontend (Vite)
+cd backend && npm run start:dev  # Backend (NestJS)
+```
+
+## 📊 API Documentation
+
+Once the backend is running, visit:
+- **Swagger UI:** http://localhost:3001/api
+- **Frontend:** http://localhost:5173
+
+## 🧪 Testing
+
+```bash
+# Backend tests
+cd backend && npm run test
+
+# Frontend tests
+npm run test
+```
+
+## 🚀 Deployment
+
+### Production Build
+```bash
+# Frontend
+npm run build
+
+# Backend
+cd backend && npm run build
+```
+
+### Environment Setup
+- Set production environment variables
+- Configure MongoDB Atlas
+- Set up Stripe production keys
+- Configure domain and SSL
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📞 Support
+
+For issues and questions:
+- Create an issue in the repository
+- Contact the development team
+- Check the API documentation
+
+## 📄 License
+
+This project is licensed under the MIT License.
