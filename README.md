@@ -22,7 +22,10 @@ cd backend && npm install
 
 # Set up environment variables
 cp backend/.env.example backend/.env
-# Edit backend/.env with your MongoDB connection string
+# Edit backend/.env with your configuration:
+# - MongoDB connection string (default: mongodb://localhost:27017/rapidwaste)
+# - JWT secrets (generate secure random strings)
+# - Stripe keys (get from Stripe dashboard for payments)
 
 # Start MongoDB (if running locally)
 mongod
