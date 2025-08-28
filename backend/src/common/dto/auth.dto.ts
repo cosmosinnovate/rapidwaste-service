@@ -4,7 +4,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 export class LoginDto {
   @ApiProperty({
     description: 'User email address',
-    example: 'driver@rapidwaste.com',
+    example: 'notary@notarynow.com',
     format: 'email',
   })
   @IsEmail()
@@ -63,15 +63,13 @@ export class RegisterDto {
   @MinLength(6)
   password: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'User role in the system',
-    enum: ['customer', 'driver'],
+    enum: ['customer', 'notary'],
     example: 'customer',
-    default: 'customer',
   })
-  @IsOptional()
-  @IsEnum(['customer', 'driver'])
-  role?: string;
+  @IsEnum(['customer', 'notary'])
+  role: 'customer' | 'notary';
 
   @ApiPropertyOptional({
     description: 'User street address',

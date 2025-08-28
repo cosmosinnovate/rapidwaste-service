@@ -25,13 +25,13 @@ export class BookingsGateway {
     console.log(`Client disconnected: ${client.id}`);
   }
 
-  @SubscribeMessage('join-driver-room')
-  handleJoinDriverRoom(
-    @MessageBody() data: { driverId: string },
+  @SubscribeMessage('join-notary-room')
+  handleJoinNotaryRoom(
+    @MessageBody() data: { notaryId: string },
     @ConnectedSocket() client: Socket,
   ) {
-    client.join(`driver-${data.driverId}`);
-    console.log(`Driver ${data.driverId} joined room`);
+    client.join(`notary-${data.notaryId}`);
+    console.log(`Notary ${data.notaryId} joined room`);
   }
 
   @SubscribeMessage('join-admin-room')
@@ -40,7 +40,7 @@ export class BookingsGateway {
     console.log('Admin joined room');
   }
 
-  // Emit new booking to all drivers
+  // Emit new booking to all notaries
   emitNewBooking(booking: any) {
     this.server.emit('new-booking', booking);
   }
@@ -49,14 +49,14 @@ export class BookingsGateway {
   emitBookingStatusUpdate(booking: any) {
     this.server.emit('booking-status-update', booking);
     
-    // Also emit to specific driver if assigned
+    // Also emit to specific notary if assigned
     if (booking.driverId) {
-      this.server.to(`driver-${booking.driverId}`).emit('driver-booking-update', booking);
+      this.server.to(`notary-${booking.driverId}`).emit('notary-booking-update', booking);
     }
   }
 
-  // Emit driver status update
-  emitDriverStatusUpdate(driverId: string, status: string) {
-    this.server.to('admin').emit('driver-status-update', { driverId, status });
+  // Emit notary status update
+  emitNotaryStatusUpdate(notaryId: string, status: string) {
+    this.server.to('admin').emit('notary-status-update', { notaryId, status });
   }
 } 

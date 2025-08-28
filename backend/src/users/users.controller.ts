@@ -10,12 +10,12 @@ import { UserDocument } from '../database/schemas/user.schema';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get('drivers')
+  @Get('notaries')
   @ApiBearerAuth('JWT-auth')
   @Roles('admin')
   @ApiOperation({
-    summary: 'Get all drivers',
-    description: 'Retrieves a list of all driver users in the system with optional filtering by active status.',
+    summary: 'Get all notaries',
+    description: 'Retrieves a list of all notary users in the system with optional filtering by active status.',
   })
   @ApiQuery({
     name: 'active',
@@ -25,30 +25,29 @@ export class UsersController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Drivers retrieved successfully',
+    description: 'Notaries retrieved successfully',
     example: {
       success: true,
       data: [
         {
           id: '507f1f77bcf86cd799439011',
-          firstName: 'John',
-          lastName: 'Driver',
-          email: 'john.driver@rapidwaste.com',
-          role: 'driver',
-          driverId: 'D0001',
+          firstName: 'Sarah',
+          lastName: 'Notary',
+          email: 'sarah.notary@notarynow.com',
+          role: 'notary',
         },
       ],
       count: 1,
     },
   })
-  async getDrivers(@Query('active') active?: string) {
+  async getNotaries(@Query('active') active?: string) {
     const isActive = active !== 'false';
-    const drivers = await this.usersService.findDrivers(isActive);
+    const notaries = await this.usersService.findNotaries(isActive);
     
     return {
       success: true,
-      data: drivers,
-      count: drivers.length,
+      data: notaries,
+      count: notaries.length,
     };
   }
 

@@ -45,7 +45,7 @@ export class PaymentsService {
 
     // Create payment intent
     const paymentIntent = await this.stripe.paymentIntents.create({
-      amount: Math.round(booking.estimatedPrice * 100), // Convert to cents
+      amount: Math.round(booking.price * 100), // Convert to cents
       currency: 'usd',
       customer: stripeCustomerId,
       metadata: {
@@ -86,7 +86,6 @@ export class PaymentsService {
           // Update booking payment status
           await this.bookingModel.findByIdAndUpdate(booking._id, {
             paymentStatus: 'paid',
-            actualPrice: paymentIntent.amount / 100, // Convert from cents
           });
 
           return {

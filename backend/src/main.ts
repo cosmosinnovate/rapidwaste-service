@@ -24,13 +24,13 @@ async function bootstrap() {
 
   // Swagger configuration
   const config = new DocumentBuilder()
-    .setTitle('RapidWaste API')
-    .setDescription('Emergency waste pickup service API for managing bookings, drivers, and customers')
+    .setTitle('NotaryNow API')
+    .setDescription('Online notary service API for managing notarization sessions, notaries, and customers')
     .setVersion('1.0')
-    .setContact('RapidWaste Team', 'https://rapidwaste.com', 'support@rapidwaste.com')
-    .addTag('Authentication', 'User and driver authentication endpoints')
-    .addTag('Bookings', 'Waste pickup booking management')
-    .addTag('Drivers', 'Driver dashboard and management')
+    .setContact('NotaryNow Team', 'https://notarynow.com', 'support@notarynow.com')
+    .addTag('Authentication', 'User and notary authentication endpoints')
+    .addTag('Bookings', 'Notarization session booking management')
+    .addTag('Notary', 'Notary dashboard and session management')
     .addTag('Users', 'User management and profiles')
     .addBearerAuth(
       {
@@ -44,7 +44,7 @@ async function bootstrap() {
       'JWT-auth'
     )
     .addServer('http://localhost:3001', 'Development server')
-    .addServer('https://api.rapidwaste.com', 'Production server')
+    .addServer('https://api.notarynow.com', 'Production server')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -61,7 +61,7 @@ async function bootstrap() {
   const port = process.env.PORT || 3001;
   await app.listen(port);
   
-  console.log(`🚀 RapidWaste Backend running on http://localhost:${port}`);
+  console.log(`🚀 NotaryNow Backend running on http://localhost:${port}`);
   console.log(`📚 API Documentation available at http://localhost:${port}/docs`);
 }
 

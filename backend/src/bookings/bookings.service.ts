@@ -14,22 +14,15 @@ export class BookingsService {
   ) {}
 
   async createBooking(createBookingDto: CreateBookingDto): Promise<Booking> {
-    // Calculate price
-    const estimatedPrice = this.calculatePrice(
-      createBookingDto.serviceType,
-      createBookingDto.bagCount,
-      createBookingDto.urgentPickup || false
-    );
-
     // Generate booking ID
-    const bookingId = this.generateBookingId(createBookingDto.serviceType);
+    const bookingId = this.generateBookingId();
 
-    // Set priority based on service type
-    const priority = createBookingDto.serviceType === 'emergency' ? 'high' : 'medium';
+    // Priority can be determined by other logic, e.g., based on serviceType or special request
+    const priority = 'medium';
 
     // Create customer if doesn't exist
     let customer = await this.userModel.findOne({ email: createBookingDto.email });
-    
+
     if (!customer) {
       customer = new this.userModel({
         firstName: createBookingDto.firstName,
@@ -47,10 +40,9 @@ export class BookingsService {
       bookingId,
       customerId: customer.id,
       customerName: `${createBookingDto.firstName} ${createBookingDto.lastName}`,
-      estimatedPrice,
+      price: createBookingDto.price, // Use price from DTO
       priority,
-      status: (createBookingDto as any).status || 'pending', // Allow status override for seeding
-      driverId: (createBookingDto as any).driverId || undefined, // Allow driver assignment for seeding
+      status: 'pending',
     });
 
     return booking.save();
@@ -82,7 +74,6 @@ export class BookingsService {
     return this.bookingModel
       .find(query)
       .populate('customerId', 'firstName lastName email phone')
-      .populate('driverId', 'firstName lastName driverId')
       .sort({ createdAt: -1 })
       .exec();
   }
@@ -91,7 +82,6 @@ export class BookingsService {
     const booking = await this.bookingModel
       .findById(id)
       .populate('customerId', 'firstName lastName email phone')
-      .populate('driverId', 'firstName lastName driverId')
       .exec();
 
     if (!booking) {
@@ -113,35 +103,16 @@ export class BookingsService {
 
     const updateData = { ...updateStatusDto };
     
-    if (updateStatusDto.status === 'completed') {
+    if (updateStatusDto.status === 'documents-ready') {
       updateData['completedAt'] = new Date();
     }
 
     const updatedBooking = await this.bookingModel
       .findByIdAndUpdate(id, updateData, { new: true })
       .populate('customerId', 'firstName lastName email phone')
-      .populate('driverId', 'firstName lastName driverId')
       .exec();
 
     return updatedBooking;
-  }
-
-  async assignDriver(bookingId: string, driverId: string): Promise<Booking> {
-    const booking = await this.bookingModel.findById(bookingId);
-    const driver = await this.userModel.findById(driverId);
-
-    if (!booking) {
-      throw new NotFoundException('Booking not found');
-    }
-
-    if (!driver || driver.role !== 'driver') {
-      throw new BadRequestException('Invalid driver');
-    }
-
-    booking.driverId = driver.id;
-    booking.status = 'scheduled';
-    
-    return booking.save();
   }
 
   async getStats(startDate?: Date, endDate?: Date): Promise<any> {
@@ -160,15 +131,12 @@ export class BookingsService {
         $group: {
           _id: null,
           totalBookings: { $sum: 1 },
-          totalRevenue: { $sum: '$estimatedPrice' },
+          totalRevenue: { $sum: '$price' }, // Use 'price' field
           completedBookings: {
-            $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] }
+            $sum: { $cond: [{ $eq: ['$status', 'documents-ready'] }, 1, 0] }
           },
           pendingBookings: {
             $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] }
-          },
-          emergencyBookings: {
-            $sum: { $cond: [{ $eq: ['$serviceType', 'emergency'] }, 1, 0] }
           },
         }
       }
@@ -179,44 +147,22 @@ export class BookingsService {
       totalRevenue: 0,
       completedBookings: 0,
       pendingBookings: 0,
-      emergencyBookings: 0,
     };
   }
 
-  private calculatePrice(serviceType: string, bagCount: string, urgentPickup: boolean): number {
-    const basePrices = {
-      regular: 45,
-      emergency: 50,
-      bulk: 79,
-    };
-
-    const bagPricing = {
-      '1-5': 0,
-      '6-10': 5,
-      '11+': 10,
-    };
-
-    const basePrice = basePrices[serviceType] || basePrices.regular;
-    const bagSurcharge = bagPricing[bagCount] || 0;
-    const urgentFee = urgentPickup ? 15 : 0;
-
-    return basePrice + bagSurcharge + urgentFee;
-  }
-
-  private generateBookingId(serviceType: string): string {
-    const prefix = serviceType === 'emergency' ? 'EMG' : 
-                   serviceType === 'bulk' ? 'BLK' : 'REG';
+  private generateBookingId(): string {
+    const prefix = 'NTRY';
     const random = Math.random().toString(36).substr(2, 6).toUpperCase();
     return `${prefix}-${random}`;
   }
 
   private validateStatusTransition(currentStatus: string, newStatus: string): void {
     const validTransitions = {
-      pending: ['scheduled', 'cancelled'],
-      scheduled: ['in-progress', 'cancelled'],
-      'in-progress': ['completed', 'cancelled'],
-      completed: [],
-      cancelled: [],
+      pending: ['scheduled', 'canceled'],
+      scheduled: ['session-active', 'canceled'],
+      'session-active': ['documents-ready', 'canceled'],
+      'documents-ready': [],
+      canceled: [],
     };
 
     if (!validTransitions[currentStatus]?.includes(newStatus)) {
@@ -225,4 +171,4 @@ export class BookingsService {
       );
     }
   }
-} 
+}

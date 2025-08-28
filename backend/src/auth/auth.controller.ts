@@ -12,27 +12,26 @@ export class AuthController {
   @Public()
   @Post('login')
   @ApiOperation({
-    summary: 'User login',
-    description: 'Authenticates a user (customer or driver) and returns JWT tokens for API access.',
+    summary: 'User Login',
+    description: 'Authenticates a user (customer or notary) and returns JWT tokens for API access.',
   })
   @ApiBody({
-    type: LoginDto,
-    description: 'User credentials',
+    description: 'User login credentials',
     examples: {
-      driverLogin: {
-        summary: 'Driver Login',
-        description: 'Example login for a driver',
-        value: {
-          email: 'driver@rapidwaste.com',
-          password: 'password123',
-        },
-      },
       customerLogin: {
         summary: 'Customer Login',
         description: 'Example login for a customer',
         value: {
           email: 'customer@example.com',
-          password: 'mypassword',
+          password: 'customerPass123',
+        },
+      },
+      notaryLogin: {
+        summary: 'Notary Login',
+        description: 'Example login for a notary',
+        value: {
+          email: 'notary@notarynow.com',
+          password: 'password123',
         },
       },
     },
@@ -78,38 +77,34 @@ export class AuthController {
   @Public()
   @Post('register')
   @ApiOperation({
-    summary: 'User registration',
-    description: 'Creates a new user account (customer or driver) and returns JWT tokens.',
+    summary: 'User Registration',
+    description: 'Creates a new user account (customer or notary) and returns JWT tokens.',
   })
   @ApiBody({
-    type: RegisterDto,
     description: 'User registration data',
     examples: {
       customerRegistration: {
         summary: 'Customer Registration',
         description: 'Example registration for a new customer',
         value: {
-          firstName: 'Jane',
-          lastName: 'Doe',
-          email: 'jane.doe@example.com',
-          phone: '(555) 987-6543',
-          password: 'securePassword123',
+          firstName: 'John',
+          lastName: 'Customer',
+          email: 'john.customer@example.com',
+          phone: '(555) 123-4567',
+          password: 'customerPass123',
           role: 'customer',
-          address: '456 Oak Avenue',
-          city: 'Otherville',
-          zipCode: '67890',
         },
       },
-      driverRegistration: {
-        summary: 'Driver Registration',
-        description: 'Example registration for a new driver',
+      notaryRegistration: {
+        summary: 'Notary Registration',
+        description: 'Example registration for a new notary',
         value: {
-          firstName: 'Mike',
-          lastName: 'Smith',
-          email: 'mike.smith@rapidwaste.com',
-          phone: '(555) 456-7890',
-          password: 'driverPass456',
-          role: 'driver',
+          firstName: 'Sarah',
+          lastName: 'Notary',
+          email: 'sarah.notary@notarynow.com',
+          phone: '(555) 987-6543',
+          password: 'notaryPass456',
+          role: 'notary',
         },
       },
     },

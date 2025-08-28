@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsEnum, IsOptional, IsBoolean, IsDateString, MinLength } from 'class-validator';
+import { IsString, IsEmail, IsEnum, IsOptional, IsBoolean, IsDateString, MinLength, IsNumber, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateBookingDto {
@@ -35,45 +35,60 @@ export class CreateBookingDto {
   @IsString()
   phone: string;
 
-  @ApiProperty({
-    description: 'Pickup street address',
+  @ApiPropertyOptional({
+    description: 'Customer address',
     example: '123 Main Street',
   })
+  @IsOptional()
   @IsString()
-  address: string;
-
-  @ApiProperty({
-    description: 'City for pickup location',
-    example: 'Anytown',
-  })
-  @IsString()
-  city: string;
-
-  @ApiProperty({
-    description: 'ZIP/Postal code for pickup location',
-    example: '12345',
-  })
-  @IsString()
-  zipCode: string;
-
-  @ApiProperty({
-    description: 'Type of waste pickup service',
-    enum: ['regular', 'emergency', 'bulk'],
-    example: 'emergency',
-  })
-  @IsEnum(['regular', 'emergency', 'bulk'])
-  serviceType: string;
-
-  @ApiProperty({
-    description: 'Number of trash bags or bulk items',
-    enum: ['1-5', '6-10', '11+'],
-    example: '1-5',
-  })
-  @IsEnum(['1-5', '6-10', '11+'])
-  bagCount: string;
+  address?: string;
 
   @ApiPropertyOptional({
-    description: 'Preferred pickup date',
+    description: 'Customer city',
+    example: 'Downtown',
+  })
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @ApiPropertyOptional({
+    description: 'Customer zip code',
+    example: '12345',
+  })
+  @IsOptional()
+  @IsString()
+  zipCode?: string;
+
+  @ApiProperty({
+    description: 'Type of notary service requested',
+    enum: ['general', 'loan_signing', 'estate_planning'],
+    example: 'general',
+  })
+  @IsEnum(['general', 'loan_signing', 'estate_planning'])
+  serviceType: string;
+
+  @ApiPropertyOptional({
+    description: 'Number of documents to be notarized',
+    example: 1,
+    minimum: 1,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  documentCount?: number;
+
+  @ApiPropertyOptional({
+    description: 'Number of witnesses required',
+    example: 0,
+    minimum: 0,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  witnesses?: number;
+
+  @ApiPropertyOptional({
+    description: 'Preferred appointment date',
     example: '2024-12-25',
     format: 'date',
   })
@@ -82,7 +97,7 @@ export class CreateBookingDto {
   preferredDate?: string;
 
   @ApiPropertyOptional({
-    description: 'Preferred pickup time',
+    description: 'Preferred appointment time',
     example: '10:30 AM',
   })
   @IsOptional()
@@ -90,19 +105,26 @@ export class CreateBookingDto {
   preferredTime?: string;
 
   @ApiPropertyOptional({
-    description: 'Special instructions for the driver',
-    example: 'Behind the garage, use side gate',
+    description: 'Special instructions for the notary',
+    example: 'This is for a real estate closing.',
   })
   @IsOptional()
   @IsString()
   specialInstructions?: string;
 
   @ApiPropertyOptional({
-    description: 'Whether this is an urgent pickup requiring priority',
+    description: 'Whether this is an urgent appointment requiring priority',
     example: false,
     default: false,
   })
   @IsOptional()
   @IsBoolean()
-  urgentPickup?: boolean;
-} 
+  urgentAppointment?: boolean;
+
+  @ApiProperty({
+    description: 'The calculated price of the booking',
+    example: 25,
+  })
+  @IsNumber()
+  price: number;
+}

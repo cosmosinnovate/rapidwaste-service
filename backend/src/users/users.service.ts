@@ -39,9 +39,9 @@ export class UsersService {
     return null;
   }
 
-  async findDrivers(active: boolean = true): Promise<UserDocument[]> {
+  async findNotaries(active: boolean = true): Promise<UserDocument[]> {
     return this.userModel
-      .find({ role: 'driver', isActive: active })
+      .find({ role: 'notary', isActive: active })
       .select('-password')
       .exec();
   }

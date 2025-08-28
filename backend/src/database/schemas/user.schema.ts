@@ -20,7 +20,7 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ enum: ['customer', 'driver', 'admin'], default: 'customer' })
+  @Prop({ enum: ['customer', 'notary', 'admin'], default: 'customer' })
   role: string;
 
   @Prop({ default: true })
@@ -35,8 +35,8 @@ export class User {
   @Prop()
   zipCode?: string;
 
-  // Driver-specific fields
-  @Prop()
+  // Notary-specific fields (reusing driver structure for compatibility)
+  // driverId now represents the assigned notary for a booking
   driverId?: string;
 
   @Prop({ type: Object })

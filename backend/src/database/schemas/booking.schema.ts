@@ -11,9 +11,6 @@ export class Booking {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   customerId: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'User' })
-  driverId?: Types.ObjectId;
-
   @Prop({ required: true })
   customerName: string;
 
@@ -23,27 +20,14 @@ export class Booking {
   @Prop({ required: true })
   email: string;
 
-  @Prop({ required: true })
-  address: string;
+  @Prop()
+  address?: string;
 
-  @Prop({ required: true })
-  city: string;
+  @Prop()
+  city?: string;
 
-  @Prop({ required: true })
-  zipCode: string;
-
-  @Prop({ 
-    enum: ['regular', 'emergency', 'bulk'], 
-    required: true 
-  })
-  serviceType: string;
-
-  @Prop({ 
-    enum: ['1-5', '6-10', '11+'], 
-    required: true,
-    default: '1-5'
-  })
-  bagCount: string;
+  @Prop()
+  zipCode?: string;
 
   @Prop()
   preferredDate?: Date;
@@ -57,11 +41,20 @@ export class Booking {
   @Prop()
   specialInstructions?: string;
 
-  @Prop({ default: false })
-  urgentPickup: boolean;
+  @Prop({ 
+    enum: ['general', 'loan_signing', 'estate_planning'], 
+    required: true 
+  })
+  serviceType: string;
+
+  @Prop()
+  documentCount?: number;
+
+  @Prop()
+  witnesses?: number;
 
   @Prop({ 
-    enum: ['pending', 'scheduled', 'in-progress', 'completed', 'cancelled'], 
+    enum: ['pending', 'scheduled', 'session-active', 'documents-ready', 'canceled'], 
     default: 'pending' 
   })
   status: string;
@@ -73,10 +66,7 @@ export class Booking {
   priority: string;
 
   @Prop({ required: true })
-  estimatedPrice: number;
-
-  @Prop()
-  actualPrice?: number;
+  price: number;
 
   @Prop({ 
     enum: ['pending', 'paid', 'failed', 'refunded'], 
@@ -94,19 +84,13 @@ export class Booking {
   stripeCustomerId?: string;
 
   @Prop()
+  providerSessionId?: string;
+
+  @Prop()
   completedAt?: Date;
 
   @Prop()
   notes?: string;
-
-  @Prop()
-  driverNotes?: string;
-
-  @Prop({ type: Object })
-  location?: {
-    lat: number;
-    lng: number;
-  };
 }
 
 export const BookingSchema = SchemaFactory.createForClass(Booking); 

@@ -4,19 +4,19 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 export class UpdateBookingStatusDto {
   @ApiProperty({
     description: 'New booking status',
-    enum: ['pending', 'scheduled', 'in-progress', 'completed', 'cancelled'],
-    example: 'in-progress',
+    enum: ['pending', 'scheduled', 'session-active', 'documents-ready', 'canceled'],
+    example: 'session-active',
   })
-  @IsEnum(['pending', 'scheduled', 'in-progress', 'completed', 'cancelled'])
+  @IsEnum(['pending', 'scheduled', 'session-active', 'documents-ready', 'canceled'])
   status: string;
 
   @ApiPropertyOptional({
-    description: 'Notes from the driver about the pickup',
-    example: 'Customer was not home, left bags at side door as instructed',
+    description: 'Notes from the notary about the session',
+    example: 'Client connection was unstable but we managed to complete the session.',
   })
   @IsOptional()
   @IsString()
-  driverNotes?: string;
+  notes?: string;
 
   @ApiPropertyOptional({
     description: 'Final price charged for the service',

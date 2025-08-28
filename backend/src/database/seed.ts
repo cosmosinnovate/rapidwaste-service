@@ -2,56 +2,51 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../app.module';
 import { UsersService } from '../users/users.service';
 import { BookingsService } from '../bookings/bookings.service';
-import { DriversService } from '../drivers/drivers.service';
+import { ConfigModule } from '@nestjs/config';
 
 async function seed() {
+  // Load environment variables
+  const configModule = await NestFactory.createApplicationContext(
+    ConfigModule.forRoot({
+      isGlobal: true,
+    })
+  );
+  
   const app = await NestFactory.createApplicationContext(AppModule);
   
   const usersService = app.get(UsersService);
   const bookingsService = app.get(BookingsService);
-  const driversService = app.get(DriversService);
 
   console.log('🌱 Seeding database...');
+  console.log('📊 MongoDB URI:', process.env.MONGODB_URI || 'mongodb://localhost:27017/notarynow');
 
+  // Check if we should force re-seed (clear existing data)
+  const forceReseed = process.argv.includes('--force') || process.argv.includes('-f');
+  
   try {
-    // Check if sample driver already exists
-    const existingDriver = await usersService.findByEmail('driver@rapidwaste.com');
+    // Check if sample notary already exists
+    const existingNotary = await usersService.findByEmail('notary@notarynow.com');
     
-    let driver;
-    if (existingDriver) {
-      console.log('ℹ️  Sample driver already exists, skipping creation...');
+    let notary;
+    if (existingNotary) {
+      console.log('ℹ️  Sample notary already exists, skipping creation...');
+      notary = existingNotary;
     } else {
-      // Create sample driver (this will create both user and driver records with proper password hashing)
-      driver = await driversService.createDriver(
-        {
-          firstName: 'John',
-          lastName: 'Driver',
-          email: 'driver@rapidwaste.com',
-          phone: '(555) 123-4567',
-          password: 'password123',
-        },
-        {
-          vehicleInfo: {
-            make: 'Ford',
-            model: 'Transit',
-            year: 2022,
-            licensePlate: 'RW-001',
-            capacity: 'Large',
-          },
-          workingHours: {
-            start: '08:00',
-            end: '18:00',
-          },
-          workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-          status: 'available',
-        }
-      );
+      // Create sample notary user directly
+      notary = await usersService.create({
+        firstName: 'Sarah',
+        lastName: 'Notary',
+        email: 'notary@notarynow.com',
+        phone: '(555) 123-4567',
+        password: 'password123',
+        role: 'notary',
+      });
 
-      console.log('✅ Driver created:', driver.driverId);
+      console.log('✅ Notary created:', notary.email);
     }
 
     // Check if admin user already exists
-    const existingAdmin = await usersService.findByEmail('admin@rapidwaste.com');
+    const existingAdmin = await usersService.findByEmail('admin@notarynow.com');
     
     if (existingAdmin) {
       console.log('ℹ️  Sample admin already exists, skipping creation...');
@@ -60,7 +55,7 @@ async function seed() {
       const admin = await usersService.create({
         firstName: 'Admin',
         lastName: 'User',
-        email: 'admin@rapidwaste.com',
+        email: 'admin@notarynow.com',
         phone: '(555) 999-0000',
         password: 'admin123',
         role: 'admin',
@@ -72,124 +67,122 @@ async function seed() {
     // Check if sample bookings already exist
     const existingBookings = await bookingsService.findAll();
     
-    if (existingBookings.length > 0) {
+    if (existingBookings.length > 0 && !forceReseed) {
       console.log('ℹ️  Sample bookings already exist, skipping creation...');
+      console.log('💡 Use --force flag to clear existing data and re-seed');
     } else {
-      // Get the driver's user ID for assignment
-      const driverUser = await usersService.findByEmail('driver@rapidwaste.com');
-      const driverUserId = driverUser.id;
-
-      // Create sample customers and bookings
+      if (forceReseed && existingBookings.length > 0) {
+        console.log('🗑️  Force flag detected, clearing existing bookings...');
+        // Clear existing bookings using mongoose model directly
+        const { default: mongoose } = await import('mongoose');
+        const bookingModel = mongoose.connection.model('Booking');
+        await bookingModel.deleteMany({});
+        console.log(`✅ Cleared ${existingBookings.length} existing bookings`);
+      }
+      
+      // Create sample bookings with proper customer data
       const sampleBookings = [
-        // Emergency - In Progress (assigned to driver)
+        // General Notary - In Progress (assigned to notary)
         {
-          firstName: 'Sarah',
-          lastName: 'Johnson',
-          email: 'sarah@example.com',
+          firstName: 'John',
+          lastName: 'Smith',
+          email: 'john.smith@example.com',
           phone: '(555) 123-4567',
           address: '1234 Oak Street',
           city: 'Downtown',
           zipCode: '12345',
-          serviceType: 'emergency',
-          bagCount: '1-5',
-          preferredDate: new Date().toISOString().split('T')[0], // Today for emergency
-          preferredTime: 'Next 2 hours',
-          specialInstructions: 'Behind garage, use side gate',
-          urgentPickup: true,
-          status: 'in-progress',
-          driverId: driverUserId,
+          serviceType: 'general',
+          documentCount: 3,
+          witnesses: 0,
+          preferredDate: new Date().toISOString().split('T')[0], // Today
+          preferredTime: '10:00 AM',
+          specialInstructions: 'Power of Attorney documents',
+          status: 'session-active',
+          priority: 'medium',
+          price: 55, // $15 per signature + $10 service fee
+          urgentAppointment: false,
         },
-        // Regular - Scheduled (assigned to driver)
+        // Loan Signing - Scheduled (assigned to notary)
         {
-          firstName: 'Mike',
-          lastName: 'Chen',
-          email: 'mike@example.com',
+          firstName: 'Maria',
+          lastName: 'Garcia',
+          email: 'maria.garcia@example.com',
           phone: '(555) 987-6543',
           address: '5678 Pine Avenue',
           city: 'Suburbs',
           zipCode: '67890',
-          serviceType: 'regular',
-          bagCount: '6-10',
+          serviceType: 'loan_signing',
+          documentCount: 15,
+          witnesses: 1,
           preferredDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Tomorrow
-          preferredTime: '10:00 AM',
-          specialInstructions: 'Front curb pickup',
-          urgentPickup: false,
+          preferredTime: '2:00 PM',
+          specialInstructions: 'First-time homebuyer loan package',
           status: 'scheduled',
-          driverId: driverUserId,
+          priority: 'high',
+          price: 200,
+          urgentAppointment: true,
         },
-        // Bulk - Completed (assigned to driver)
+        // Estate Planning - Completed (assigned to notary)
         {
-          firstName: 'Jennifer',
-          lastName: 'Smith',
-          email: 'jennifer@example.com',
+          firstName: 'Robert',
+          lastName: 'Johnson',
+          email: 'robert.johnson@example.com',
           phone: '(555) 456-7890',
           address: '9012 Maple Drive',
           city: 'East Side',
           zipCode: '11111',
-          serviceType: 'bulk',
-          bagCount: '11+',
+          serviceType: 'estate_planning',
+          documentCount: 8,
+          witnesses: 2,
           preferredDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Yesterday
-          preferredTime: '2:00 PM',
-          specialInstructions: 'Old couch and dining table, call upon arrival',
-          urgentPickup: false,
-          status: 'completed',
-          driverId: driverUserId,
+          preferredTime: '11:00 AM',
+          specialInstructions: 'Trust documents and will notarization',
+          status: 'documents-ready',
+          priority: 'medium',
+          price: 320,
+          urgentAppointment: false,
         },
-        // Emergency - Pending (assigned to driver)
+        // General Notary - Pending (assigned to notary)
         {
-          firstName: 'Robert',
-          lastName: 'Wilson',
-          email: 'robert@example.com',
+          firstName: 'Lisa',
+          lastName: 'Brown',
+          email: 'lisa.brown@example.com',
           phone: '(555) 321-0987',
           address: '3456 Cedar Lane',
           city: 'North',
           zipCode: '22222',
-          serviceType: 'emergency',
-          bagCount: '1-5',
-          preferredDate: new Date().toISOString().split('T')[0], // Today for emergency
-          preferredTime: 'Today by 6 PM',
-          specialInstructions: 'Apartment building, unit 4B',
-          urgentPickup: false,
+          serviceType: 'general',
+          documentCount: 1,
+          witnesses: 0,
+          preferredDate: new Date().toISOString().split('T')[0], // Today
+          preferredTime: '4:00 PM',
+          specialInstructions: 'Affidavit notarization',
           status: 'pending',
-          driverId: driverUserId,
+          priority: 'low',
+          price: 25,
+          urgentAppointment: false,
         },
-        // Regular - Cancelled (assigned to driver)
+        // Loan Signing - Cancelled (assigned to notary)
         {
-          firstName: 'Lisa',
-          lastName: 'Garcia',
-          email: 'lisa.garcia@example.com',
+          firstName: 'David',
+          lastName: 'Wilson',
+          email: 'david.wilson@example.com',
           phone: '(555) 555-1234',
           address: '7890 Elm Street',
           city: 'Westside',
           zipCode: '33333',
-          serviceType: 'regular',
-          bagCount: '1-5',
+          serviceType: 'loan_signing',
+          documentCount: 12,
+          witnesses: 1,
           preferredDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Tomorrow
-          preferredTime: '4:00 PM',
-          specialInstructions: 'Ring doorbell twice',
-          urgentPickup: false,
-          status: 'cancelled',
-          driverId: driverUserId,
+          preferredTime: '3:00 PM',
+          specialInstructions: 'Refinance loan documents',
+          status: 'canceled',
+          priority: 'medium',
+          price: 175,
+          urgentAppointment: false,
         },
-        // Emergency - Completed (assigned to driver)
-        {
-          firstName: 'David',
-          lastName: 'Brown',
-          email: 'david.brown@example.com',
-          phone: '(555) 888-9999',
-          address: '1111 Main Street',
-          city: 'Downtown',
-          zipCode: '44444',
-          serviceType: 'emergency',
-          bagCount: '6-10',
-          preferredDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Yesterday
-          preferredTime: 'Next 4 hours',
-          specialInstructions: 'Commercial building, loading dock access',
-          urgentPickup: true,
-          status: 'completed',
-          driverId: driverUserId,
-        },
-        // Bulk - Scheduled (not assigned - available for assignment)
+        // Estate Planning - Scheduled (not assigned - available for assignment)
         {
           firstName: 'Amanda',
           lastName: 'Martinez',
@@ -198,16 +191,18 @@ async function seed() {
           address: '2468 Broadway',
           city: 'Midtown',
           zipCode: '55555',
-          serviceType: 'bulk',
-          bagCount: '11+',
+          serviceType: 'estate_planning',
+          documentCount: 6,
+          witnesses: 1,
           preferredDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Day after tomorrow
-          preferredTime: '12:00 PM',
-          specialInstructions: 'Large appliances - refrigerator and washing machine',
-          urgentPickup: false,
+          preferredTime: '1:00 PM',
+          specialInstructions: 'Estate planning documents for elderly couple',
           status: 'scheduled',
-          // No driverId - available for assignment
+          priority: 'high',
+          price: 280,
+          urgentAppointment: true,
         },
-        // Regular - In Progress (assigned to driver)
+        // General Notary - In Progress (assigned to notary)
         {
           firstName: 'Kevin',
           lastName: 'Lee',
@@ -216,64 +211,73 @@ async function seed() {
           address: '3579 Oak Avenue',
           city: 'Eastside',
           zipCode: '66666',
-          serviceType: 'regular',
-          bagCount: '6-10',
+          serviceType: 'general',
+          documentCount: 2,
+          witnesses: 0,
           preferredDate: new Date().toISOString().split('T')[0], // Today
-          preferredTime: '8:00 AM',
-          specialInstructions: 'Weekly pickup, bags in alley',
-          urgentPickup: false,
-          status: 'in-progress',
-          driverId: driverUserId,
+          preferredTime: '9:00 AM',
+          specialInstructions: 'Contract notarization',
+          status: 'session-active',
+          priority: 'medium',
+          price: 40,
+          urgentAppointment: false,
         },
-        // Emergency - Scheduled (assigned to driver)
+        // Loan Signing - Scheduled (assigned to notary)
         {
-          firstName: 'Maria',
-          lastName: 'Rodriguez',
-          email: 'maria@example.com',
-          phone: '(555) 222-3333',
+          firstName: 'Jennifer',
+          lastName: 'Taylor',
+          email: 'jennifer@example.com',
+          phone: '(555) 222-3332',
           address: '4680 Sunset Blvd',
           city: 'Hollywood',
           zipCode: '77777',
-          serviceType: 'emergency',
-          bagCount: '1-5',
+          serviceType: 'loan_signing',
+          documentCount: 18,
+          witnesses: 2,
           preferredDate: new Date().toISOString().split('T')[0], // Today
-          preferredTime: 'Today by 6 PM',
-          specialInstructions: 'Office building cleanup after water damage',
-          urgentPickup: true,
+          preferredTime: '3:00 PM',
+          specialInstructions: 'Commercial property loan package',
           status: 'scheduled',
-          driverId: driverUserId,
+          priority: 'high',
+          price: 225,
+          urgentAppointment: true,
         },
-        // Bulk - Pending (not assigned - available for assignment)
+        // General Notary - Pending (not assigned - available for assignment)
         {
           firstName: 'James',
-          lastName: 'Taylor',
-          email: 'james.taylor@example.com',
+          lastName: 'Anderson',
+          email: 'james.anderson@example.com',
           phone: '(555) 111-2222',
           address: '5791 Pine Street',
           city: 'Southside',
           zipCode: '88888',
-          serviceType: 'bulk',
-          bagCount: '11+',
+          serviceType: 'general',
+          documentCount: 4,
+          witnesses: 0,
           preferredDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 3 days from now
           preferredTime: '10:00 AM',
-          specialInstructions: 'Construction debris from home renovation',
-          urgentPickup: false,
+          specialInstructions: 'Multiple affidavit notarizations',
           status: 'pending',
-          // No driverId - available for assignment
+          priority: 'low',
+          price: 70,
+          urgentAppointment: false,
         },
       ];
 
       for (const bookingData of sampleBookings) {
         const booking = await bookingsService.createBooking(bookingData);
-        console.log('✅ Booking created:', booking.bookingId);
+        console.log('✅ Notarization session created:', booking.bookingId, `for ${bookingData.firstName} ${bookingData.lastName}`);
       }
     }
 
     console.log('🎉 Database seeded successfully!');
     console.log('\n📋 Sample Data Available:');
-    console.log('- Admin: admin@rapidwaste.com / admin123');
-    console.log('- Driver: driver@rapidwaste.com / password123');
-    console.log('- Sample bookings with different service types');
+    console.log('- Admin: admin@notarynow.com / admin123');
+    console.log('- Notary: notary@notarynow.com / password123');
+    console.log('- Sample notarization sessions with different service types:');
+    console.log('  • General Notary Work ($15 per signature + $10 fee)');
+    console.log('  • Loan Documents ($100-$250 per package)');
+    console.log('  • Estate Planning ($120-$400 per package)');
     console.log('\n🚀 You can now start the backend server!');
 
   } catch (error) {
