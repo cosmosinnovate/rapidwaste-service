@@ -3,6 +3,19 @@ import { useAuth } from '../contexts/AuthContext';
 import LoginForm from './LoginForm';
 import ApiService from '../services/api';
 
+// Import modular components
+import OverviewTab from './admin/tabs/OverviewTab';
+import BookingsTab from './admin/tabs/BookingsTab';
+import DocumentsTab from './admin/tabs/DocumentsTab';
+import NotariesTab from './admin/tabs/NotariesTab';
+import CustomersTab from './admin/tabs/CustomersTab';
+import DocumentManagementModal from './admin/modals/DocumentManagementModal';
+import InvoiceGenerationModal from './admin/modals/InvoiceGenerationModal';
+
+// Import utilities
+import { validateStatusTransition } from './admin/utils/statusUtils.jsx';
+import { generateFinalPDF } from './admin/utils/documentUtils.jsx';
+
 const AdminDashboard = () => {
   const { user, logout, isAuthenticated, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
@@ -17,58 +30,31 @@ const AdminDashboard = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [updatingBooking, setUpdatingBooking] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
-
-  const validateStatusTransition = (currentStatus, newStatus) => {
-    const validTransitions = {
-      pending: ['scheduled', 'canceled'],
-      scheduled: ['session-active', 'canceled'],
-      'session-active': ['documents-ready', 'canceled'],
-      'documents-ready': [],
-      canceled: [],
-    };
-
-    return validTransitions[currentStatus]?.includes(newStatus);
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'scheduled': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'session-active': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'documents-ready': return 'bg-green-100 text-green-800 border-green-200';
-      case 'canceled': return 'bg-red-100 text-red-800 border-red-200';
-      case 'pending': return 'bg-orange-100 text-orange-800 border-orange-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getServiceIcon = (serviceType) => {
-    switch (serviceType) {
-      case 'general':
-        return (
-          <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-        );
-      case 'loan_signing':
-        return (
-          <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-          </svg>
-        );
-      case 'estate_planning':
-        return (
-          <svg className="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-          </svg>
-        );
-      default:
-        return (
-          <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-          </svg>
-        );
-    }
-  };
+  const [documents, setDocuments] = useState({
+    // Sample documents for demonstration - in real app, this would come from backend
+    'sample-booking-1': [
+      {
+        id: 1,
+        name: 'Power_of_Attorney.pdf',
+        type: 'application/pdf',
+        size: 2048576,
+        uploadedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+        status: 'uploaded'
+      },
+      {
+        id: 2,
+        name: 'ID_Document.jpg',
+        type: 'image/jpeg',
+        size: 1048576,
+        uploadedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+        status: 'uploaded'
+      }
+    ]
+  });
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [selectedBookingForDocs, setSelectedBookingForDocs] = useState(null);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [selectedBookingForInvoice, setSelectedBookingForInvoice] = useState(null);
 
   const fetchDashboardData = async () => {
     try {
@@ -222,15 +208,6 @@ const AdminDashboard = () => {
     );
   }
 
-  const filteredBookings = bookings.filter(booking => {
-    const statusMatch = selectedStatus === 'all' || booking.status === selectedStatus;
-    const dateMatch = !selectedDate || 
-      new Date(booking.preferredDate).toISOString().split('T')[0] === selectedDate;
-    return statusMatch && dateMatch;
-  });
-
-  console.log('bookings', bookings);
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -258,6 +235,7 @@ const AdminDashboard = () => {
             {[
               { id: 'overview', name: 'Overview', icon: 'home' },
               { id: 'bookings', name: 'Notarization Sessions', icon: 'clipboard' },
+              { id: 'documents', name: 'Documents & Invoices', icon: 'document' },
               { id: 'notaries', name: 'Notaries', icon: 'user-check' },
               { id: 'customers', name: 'Customers', icon: 'users' },
             ].map((tab) => (
@@ -309,357 +287,68 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Overview Tab */}
+        {/* Tab Content */}
         {activeTab === 'overview' && (
-          <div className="space-y-6">
-            {/* Debug Info */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="bg-gray-100 p-4 rounded text-sm">
-                <p>Debug: dashboardData = {dashboardData ? 'loaded' : 'null'}</p>
-                <p>Debug: bookings count = {bookings.length}</p>
-                <p>Debug: notaries count = {notaries.length}</p>
-              </div>
-            )}
-            
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-5">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v2m0 8a2 2 0 002 2h2m8-12h2a2 2 0 012 2v2m0 8a2 2 0 01-2 2h-2M9 5v14m6-14v14" />
-                      </svg>
-                    </div>
-                    <div className="ml-5 w-0 flex-1">
-                      <dl>
-                        <dt className="text-sm font-medium text-gray-500 truncate">Total Sessions</dt>
-                        <dd className="text-lg font-medium text-gray-900">
-                          {dashboardData ? dashboardData.totalBookings : bookings.length}
-                        </dd>
-                      </dl>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-5">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <svg className="h-6 w-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div className="ml-5 w-0 flex-1">
-                      <dl>
-                        <dt className="text-sm font-medium text-gray-500 truncate">Pending Sessions</dt>
-                        <dd className="text-lg font-medium text-gray-900">
-                          {dashboardData ? dashboardData.pendingBookings : bookings.filter(b => b.status === 'pending').length}
-                        </dd>
-                      </dl>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-5">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <svg className="h-6 w-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                      </svg>
-                    </div>
-                    <div className="ml-5 w-0 flex-1">
-                      <dl>
-                        <dt className="text-sm font-medium text-gray-500 truncate">Total Revenue</dt>
-                        <dd className="text-lg font-medium text-gray-900">
-                          ${dashboardData ? dashboardData.totalRevenue : bookings.filter(b => b.status === 'documents-ready').reduce((sum, b) => sum + (b.price || 0), 0)}
-                        </dd>
-                      </dl>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-5">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <svg className="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
-                    </div>
-                    <div className="ml-5 w-0 flex-1">
-                      <dl>
-                        <dt className="text-sm font-medium text-gray-500 truncate">Available Notaries</dt>
-                        <dd className="text-lg font-medium text-gray-900">
-                          {dashboardData ? `${dashboardData.availableNotaries}/${dashboardData.totalNotaries}` : `${notaries.filter(n => n.isActive !== false).length}/${notaries.length}`}
-                        </dd>
-                      </dl>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">Recent Notarization Sessions</h3>
-              </div>
-              <div className="divide-y divide-gray-200">
-                {bookings.length === 0 ? (
-                  <div className="px-6 py-8 text-center text-gray-500">
-                    No notarization sessions found
-                  </div>
-                ) : (
-                  bookings.slice(0, 5).map((booking) => (
-                    <div key={booking._id} className="px-6 py-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          {getServiceIcon(booking.serviceType)}
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">
-                              {booking.firstName} {booking.lastName} - {booking.bookingId}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              {booking.serviceType} notarization • {booking.address}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(booking.status)}`}>
-                            {booking.status}
-                          </span>
-                          <span className="text-sm text-gray-500">${booking.price}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
+          <OverviewTab 
+            dashboardData={dashboardData}
+            bookings={bookings}
+            notaries={notaries}
+            documents={documents}
+          />
         )}
 
-        {/* Bookings Tab */}
         {activeTab === 'bookings' && (
-          <div className="space-y-6">
-            {/* Filters */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                  <select
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  >
-                    <option value="all">All Statuses</option>
-                    <option value="pending">New User (Pending)</option>
-                    <option value="scheduled">Scheduled</option>
-                    <option value="session-active">Processing (Active Session)</option>
-                    <option value="documents-ready">Processed (Ready)</option>
-                    <option value="canceled">Canceled</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
-                <div className="flex items-end">
-                  <button
-                    onClick={() => {
-                      setSelectedStatus('all');
-                      setSelectedDate('');
-                    }}
-                    className="w-full bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
-                  >
-                    Clear Filters
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Bookings List */}
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">
-                  Notarization Sessions ({filteredBookings.length})
-                </h3>
-              </div>
-              <div className="divide-y divide-gray-200">
-                {filteredBookings.map((booking) => (
-                  <div key={booking._id} className="px-6 py-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-                      <div>
-                        <div className="flex items-center space-x-3">
-                          {getServiceIcon(booking.serviceType)}
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">{booking.bookingId}</p>
-                            <p className="text-sm text-gray-500">{booking.firstName} {booking.lastName}</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-900">{booking.address}</p>
-                        <p className="text-sm text-gray-500">{booking.city}, {booking.zipCode}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-900">
-                          {new Date(booking.preferredDate).toLocaleDateString()}
-                        </p>
-                        <p className="text-sm text-gray-500">{booking.preferredTime}</p>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-2">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(booking.status)}`}>
-                            {booking.status}
-                          </span>
-                          <p className="text-sm text-gray-500">${booking.price}</p>
-                        </div>
-                        <div className="space-x-2">
-                          <select
-                            value={booking.status}
-                            onChange={(e) => handleUpdateBookingStatus(booking._id, e.target.value)}
-                            className="text-xs border border-gray-300 rounded px-2 py-1"
-                            disabled={updatingBooking === booking._id}
-                          >
-                            <option value="pending" disabled={!validateStatusTransition(booking.status, 'pending')}>
-                              New User (Pending)
-                            </option>
-                            <option value="scheduled" disabled={!validateStatusTransition(booking.status, 'scheduled')}>
-                              Scheduled
-                            </option>
-                            <option value="session-active" disabled={!validateStatusTransition(booking.status, 'session-active')}>
-                              Processing (Active Session)
-                            </option>
-                            <option value="documents-ready" disabled={!validateStatusTransition(booking.status, 'documents-ready')}>
-                              Processed (Ready)
-                            </option>
-                            <option value="canceled" disabled={!validateStatusTransition(booking.status, 'canceled')}>
-                              Canceled
-                            </option>
-                          </select>
-                          {updatingBooking === booking._id && (
-                            <span className="text-xs text-blue-600 ml-2">Updating...</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <BookingsTab 
+            bookings={bookings}
+            selectedStatus={selectedStatus}
+            setSelectedStatus={setSelectedStatus}
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            updatingBooking={updatingBooking}
+            handleUpdateBookingStatus={handleUpdateBookingStatus}
+            setSelectedBookingForDocs={setSelectedBookingForDocs}
+            setShowDocumentModal={setShowDocumentModal}
+            documents={documents}
+          />
         )}
 
-        {/* Notaries Tab */}
+        {activeTab === 'documents' && (
+          <DocumentsTab 
+            bookings={bookings}
+            documents={documents}
+            setSelectedBookingForDocs={setSelectedBookingForDocs}
+            setShowDocumentModal={setShowDocumentModal}
+            setSelectedBookingForInvoice={setSelectedBookingForInvoice}
+            setShowInvoiceModal={setShowInvoiceModal}
+            generateFinalPDF={(booking) => generateFinalPDF(booking, documents, setSuccessMessage)}
+          />
+        )}
+
         {activeTab === 'notaries' && (
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Notaries ({notaries.length})</h3>
-            </div>
-            <div className="divide-y divide-gray-200">
-              {notaries.map((notary) => (
-                <div key={notary._id} className="px-6 py-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex-shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-blue-300 flex items-center justify-center">
-                          <span className="text-sm font-medium text-blue-700">
-                            {notary.firstName?.[0]}{notary.lastName?.[0]}
-                          </span>
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {notary.firstName} {notary.lastName}
-                        </p>
-                        <p className="text-sm text-gray-500">{notary.email}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        notary.isActive !== false 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {notary.isActive !== false ? 'Active' : 'Inactive'}
-                      </span>
-                      <p className="text-sm text-gray-500">
-                        {notary.phone}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <NotariesTab notaries={notaries} />
         )}
 
-        {/* Customers Tab */}
         {activeTab === 'customers' && (
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Recent Customers</h3>
-            </div>
-            <div className="divide-y divide-gray-200">
-
-              {Array.from(new Map(
-                bookings.map(booking => [
-                  booking.customerId?._id || booking.email,
-                  {
-                    id: booking.customerId?._id || booking.email,
-                    name: booking.customerName,
-                    email: booking.customerEmail,
-                    phone: booking.customerPhone,
-                    address: booking.customerAddress,
-                    totalBookings: bookings.filter(b => 
-                      (b.customerId?._id || b.email) === (booking.customerId?._id || booking.email)
-                    ).length,
-                    lastBooking: Math.max(...bookings
-                      .filter(b => (b.customerId?._id || b.email) === (booking.customerId?._id || booking.email))
-                      .map(b => new Date(b.createdAt).getTime())
-                    )
-                  }
-                ])
-              ).values()).map((customer) => (
-                <div key={customer.id} className="px-6 py-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex-shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                          <span className="text-sm font-medium text-gray-700">
-                            {customer.name?.split(' ').map(n => n[0]).join('')}
-                          </span>
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{customer.name}</p>
-                        <p className="text-sm text-gray-500">{customer.email}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-900">{customer.totalBookings} sessions</p>
-                      <p className="text-sm text-gray-500">
-                        Last: {new Date(customer.lastBooking).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <CustomersTab bookings={bookings} />
         )}
       </div>
+
+      {/* Modals */}
+      <DocumentManagementModal 
+        showDocumentModal={showDocumentModal}
+        selectedBookingForDocs={selectedBookingForDocs}
+        setShowDocumentModal={setShowDocumentModal}
+        documents={documents}
+        setDocuments={setDocuments}
+        setSuccessMessage={setSuccessMessage}
+      />
+
+      <InvoiceGenerationModal 
+        showInvoiceModal={showInvoiceModal}
+        selectedBookingForInvoice={selectedBookingForInvoice}
+        setShowInvoiceModal={setShowInvoiceModal}
+        setSuccessMessage={setSuccessMessage}
+      />
     </div>
   );
 };
