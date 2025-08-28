@@ -44,4 +44,8 @@
   .text-gradient {
     @apply bg-gradient-to-r from-primary-600 to-emergency-600 bg-clip-text text-transparent;
   }
+  
+  .text-gradient-blue {
+    @apply bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent;
+  }
 } 

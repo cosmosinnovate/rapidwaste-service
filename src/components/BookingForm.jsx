@@ -7,11 +7,6 @@ const BookingForm = () => {
     lastName: '',
     email: '',
     phone: '',
-    address: '',
-    city: '',
-    zipCode: '',
-    serviceType: 'emergency',
-    bagCount: '1-5',
     preferredDate: '',
     preferredTime: '',
     specialInstructions: '',
@@ -24,55 +19,11 @@ const BookingForm = () => {
   const [error, setError] = useState('');
   const [bookingData, setBookingData] = useState(null);
 
-  // Auto-set date for emergency services
-  useEffect(() => {
-    if (formData.serviceType === 'emergency') {
-      setFormData(prev => ({
-        ...prev,
-        preferredDate: new Date().toISOString().split('T')[0],
-        preferredTime: '' // Reset time selection when switching to emergency
-      }));
-    }
-  }, [formData.serviceType]);
-
   // Pricing calculator
   const calculatePrice = () => {
-    const basePrices = {
-      regular: 45,
-      emergency: 50,
-      bulk: 79
-    };
-
-    const bagPricing = {
-      '1-5': 0,
-      '6-10': 5,
-      '11+': 10
-    };
-
-    // Emergency time slot pricing
-    const emergencyTimeFees = {
-      'Next 2 hours': 10,
-      'Next 4 hours': 5,
-      'Today by 6 PM': 0
-    };
-
-    const basePrice = basePrices[formData.serviceType];
-    const bagSurcharge = bagPricing[formData.bagCount];
-    const urgentFee = formData.urgentPickup ? 15 : 0;
-    
-    // Add emergency time slot fee if applicable
-    const emergencyTimeFee = formData.serviceType === 'emergency' && formData.preferredTime 
-      ? (emergencyTimeFees[formData.preferredTime] || 0) 
-      : 0;
-
-    return basePrice + bagSurcharge + urgentFee + emergencyTimeFee;
-  };
-
-  const generateBookingId = () => {
-    const prefix = formData.serviceType === 'emergency' ? 'EMG' : 
-                   formData.serviceType === 'bulk' ? 'BLK' : 'REG';
-    const random = Math.random().toString(36).substr(2, 6).toUpperCase();
-    return `${prefix}-${random}`;
+    const basePrice = 50; // Standard price for a notary session
+    const urgentFee = formData.urgentPickup ? 25 : 0; // Extra fee for urgent requests
+    return basePrice + urgentFee;
   };
 
   const handleInputChange = (e) => {
@@ -142,7 +93,7 @@ const BookingForm = () => {
                   </svg>
                 </div>
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">Booking Confirmed!</h2>
-                <p className="text-gray-600">Your emergency waste pickup has been scheduled</p>
+                <p className="text-gray-600">Your notary appointment has been scheduled.</p>
               </div>
 
               <div className="bg-gray-50 rounded-lg p-6 mb-6 text-left">
@@ -154,7 +105,7 @@ const BookingForm = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Service:</span>
-                    <span className="font-semibold capitalize">{formData.serviceType.replace('-', ' ')}</span>
+                    <span className="font-semibold capitalize">Notary Appointment</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Total Cost:</span>
@@ -172,20 +123,19 @@ const BookingForm = () => {
               </div>
 
               <div className="space-y-4">
-                <div className="bg-emergency-50 border border-emergency-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-emergency-800 mb-2">Next Steps</h4>
-                  <ul className="text-sm text-emergency-700 space-y-1 text-left">
-                    <li>• SMS confirmation sent to {formData.phone}</li>
-                    <li>• Driver will call 30 minutes before arrival</li>
-                    <li>• Place bags at designated pickup location</li>
-                    <li>• Payment due on service completion</li>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-blue-800 mb-2">Next Steps</h4>
+                  <ul className="text-sm text-blue-700 space-y-1 text-left">
+                    <li>• An email confirmation with the session link will be sent to {formData.email}</li>
+                    <li>• Please join the session 5 minutes before your scheduled time.</li>
+                    <li>• Ensure you have a stable internet connection and a valid ID.</li>
                   </ul>
                 </div>
 
                 <div className="text-center">
-                  <p className="text-gray-600 mb-4">Need immediate assistance?</p>
-                  <a href="tel:+1-800-RAPID-WASTE" className="btn-emergency inline-block">
-                    Call Emergency Hotline
+                  <p className="text-gray-600 mb-4">Need to make a change?</p>
+                  <a href="mailto:support@notaryapp.com" className="btn-secondary inline-block">
+                    Contact Support
                   </a>
                 </div>
               </div>
@@ -202,7 +152,7 @@ const BookingForm = () => {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Book Your <span className="text-gradient">Pickup Service</span>
+              Book Your <span className="text-gradient">Notary Session</span>
             </h2>
           </div>
 
@@ -210,7 +160,7 @@ const BookingForm = () => {
             <div className="lg:col-span-2">
               <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg p-8 space-y-6">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Personal Information</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Your Information</h3>
                   <div className="grid md:grid-cols-2 gap-4">
                     <input
                       type="text"
@@ -252,116 +202,43 @@ const BookingForm = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Pickup Address</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Appointment Details</h3>
                   <div className="space-y-4">
-                    <input
-                      type="text"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      className="input-field"
-                      placeholder="Street Address"
-                      required
-                    />
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <input
-                        type="text"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        className="input-field"
-                        placeholder="City"
-                        required
-                      />
-                      <input
-                        type="text"
-                        name="zipCode"
-                        value={formData.zipCode}
-                        onChange={handleInputChange}
-                        className="input-field"
-                        placeholder="ZIP Code"
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Service Details</h3>
-                  <div className="space-y-4">
-                    <select
-                      name="serviceType"
-                      value={formData.serviceType}
-                      onChange={handleInputChange}
-                      className="input-field"
-                      required
-                    >
-                      <option value="emergency">Emergency Same-Day ($50 base)</option>
-                      <option value="regular">Regular Pickup ($45 base)</option>
-                      <option value="bulk">Bulk Item Removal ($79 base)</option>
-                    </select>
-
-                    <select
-                      name="bagCount"
-                      value={formData.bagCount}
-                      onChange={handleInputChange}
-                      className="input-field"
-                    >
-                      <option value="1-5">1-5 bags (Base rate)</option>
-                      <option value="6-10">6-10 bags (+$5)</option>
-                      <option value="11+">11+ bags (+$10)</option>
-                    </select>
-
-                    {/* Pickup Date and Time */}
+                    {/* Appointment Date and Time */}
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {formData.serviceType === 'emergency' ? 'Pickup Date (Today)' : 'Preferred Pickup Date *'}
+                          Preferred Date
                         </label>
                         <input
                           type="date"
                           name="preferredDate"
-                          value={formData.preferredDate || (formData.serviceType === 'emergency' ? new Date().toISOString().split('T')[0] : '')}
+                          value={formData.preferredDate}
                           onChange={handleInputChange}
                           className="input-field"
                           min={new Date().toISOString().split('T')[0]} // Prevent past dates
-                          max={formData.serviceType === 'emergency' ? new Date().toISOString().split('T')[0] : undefined} // Emergency = today only
-                          required={formData.serviceType !== 'emergency'}
-                          disabled={formData.serviceType === 'emergency'}
+                          required
                         />
-                        {formData.serviceType === 'emergency' && (
-                          <p className="text-sm text-orange-600 mt-1">Emergency pickups are scheduled for today</p>
-                        )}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {formData.serviceType === 'emergency' ? 'Preferred Time Slot *' : 'Preferred Time'}
+                          Preferred Time
                         </label>
                         <select
                           name="preferredTime"
                           value={formData.preferredTime}
                           onChange={handleInputChange}
                           className="input-field"
-                          required={formData.serviceType === 'emergency'}
+                          required
                         >
-                          <option value="">{formData.serviceType === 'emergency' ? 'Select time slot' : 'Any time'}</option>
-                          {formData.serviceType === 'emergency' ? (
-                            // Emergency time slots (same day)
-                            <>
-                              <option value="Next 2 hours">Next 2 hours (+$10)</option>
-                              <option value="Next 4 hours">Next 4 hours (+$5)</option>
-                              <option value="Today by 6 PM">Today by 6 PM (standard)</option>
-                            </>
-                          ) : (
-                            // Regular time slots
-                            <>
-                              <option value="8:00 AM">8:00 AM - 10:00 AM</option>
-                              <option value="10:00 AM">10:00 AM - 12:00 PM</option>
-                              <option value="12:00 PM">12:00 PM - 2:00 PM</option>
-                              <option value="2:00 PM">2:00 PM - 4:00 PM</option>
-                              <option value="4:00 PM">4:00 PM - 6:00 PM</option>
-                            </>
-                          )}
+                          <option value="">Select a time slot</option>
+                          <option value="09:00">9:00 AM - 10:00 AM</option>
+                          <option value="10:00">10:00 AM - 11:00 AM</option>
+                          <option value="11:00">11:00 AM - 12:00 PM</option>
+                          <option value="13:00">1:00 PM - 2:00 PM</option>
+                          <option value="14:00">2:00 PM - 3:00 PM</option>
+                          <option value="15:00">3:00 PM - 4:00 PM</option>
+                          <option value="16:00">4:00 PM - 5:00 PM</option>
                         </select>
                       </div>
                     </div>
@@ -372,8 +249,22 @@ const BookingForm = () => {
                       onChange={handleInputChange}
                       rows={4}
                       className="input-field"
-                      placeholder="Special Instructions for Driver"
+                      placeholder="Special Instructions for the Notary (e.g., number of documents)"
                     />
+
+                    <div className="flex items-center">
+                      <input
+                        id="urgentPickup"
+                        name="urgentPickup"
+                        type="checkbox"
+                        checked={formData.urgentPickup}
+                        onChange={handleInputChange}
+                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="urgentPickup" className="ml-2 block text-sm text-gray-900">
+                        This is an urgent request (session within 24 hours, +$25 fee)
+                      </label>
+                    </div>
                   </div>
                 </div>
 
@@ -394,7 +285,7 @@ const BookingForm = () => {
                   className={`w-full text-lg py-3 px-6 rounded-lg font-semibold transition-colors duration-200 ${
                     loading 
                       ? 'bg-gray-400 cursor-not-allowed text-white' 
-                      : 'bg-emergency-600 hover:bg-emergency-700 text-white'
+                      : 'bg-primary-600 hover:bg-primary-700 text-white'
                   }`}
                 >
                   {loading ? (
@@ -403,38 +294,40 @@ const BookingForm = () => {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Creating Booking...
+                      Processing...
                     </div>
-                  ) : (
-                    `Book Service - $${calculatePrice()}`
-                  )}
+                  ) : `Book Appointment - $${calculatePrice()}`}
                 </button>
               </form>
             </div>
 
-            <div className="space-y-6">
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Pricing Summary</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Base Service</span>
-                    <span className="font-semibold">
-                      ${formData.serviceType === 'emergency' ? '50' : 
-                        formData.serviceType === 'bulk' ? '79' : '45'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Bag Count ({formData.bagCount})</span>
-                    <span className="font-semibold">
-                      +${formData.bagCount === '6-10' ? '5' : 
-                          formData.bagCount === '11+' ? '10' : '0'}
-                    </span>
-                  </div>
-                  <div className="border-t border-gray-200 pt-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-lg font-bold text-gray-900">Total</span>
-                      <span className="text-2xl font-bold text-primary-600">${calculatePrice()}</span>
-                    </div>
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-2xl shadow-lg p-8 sticky top-24">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">How It Works</h3>
+                <ul className="space-y-4 text-gray-600">
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0 w-6 h-6 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center font-bold mr-3">1</div>
+                    <span>Fill out your details and desired appointment time.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0 w-6 h-6 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center font-bold mr-3">2</div>
+                    <span>Upload your documents securely after booking.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0 w-6 h-6 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center font-bold mr-3">3</div>
+                    <span>Receive a confirmation email with your virtual session link.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0 w-6 h-6 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center font-bold mr-3">4</div>
+                    <span>Meet the notary online to get your documents signed!</span>
+                  </li>
+                </ul>
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-3">We Support</h4>
+                  <div className="flex justify-around items-center text-gray-500">
+                    <span>Oaths</span>
+                    <span>Affidavits</span>
+                    <span>Deeds</span>
                   </div>
                 </div>
               </div>
@@ -446,4 +339,4 @@ const BookingForm = () => {
   );
 };
 
-export default BookingForm; 
+export default BookingForm;

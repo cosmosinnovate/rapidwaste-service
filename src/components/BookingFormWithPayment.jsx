@@ -1,22 +1,16 @@
 import { useState, useEffect } from 'react';
 import ApiService from '../services/api';
-// import PaymentForm from './PaymentForm';
 
 const BookingFormWithPayment = () => {
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    zipCode: '',
-    serviceType: 'emergency',
-    bagCount: '1-5',
+    signers: [{ name: '', email: '', phone: '' }],
+    witnesses: 0,
+    serviceType: 'general',
+    documentCount: 1,
     preferredDate: '',
     preferredTime: '',
     specialInstructions: '',
-    urgentPickup: false
   });
 
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -27,46 +21,48 @@ const BookingFormWithPayment = () => {
   const [bookingData, setBookingData] = useState(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
-  // Auto-set date for emergency services
+  // Auto-set date for today if not provided
   useEffect(() => {
-    if (formData.serviceType === 'emergency') {
+    if (!formData.preferredDate) {
       setFormData(prev => ({
         ...prev,
         preferredDate: new Date().toISOString().split('T')[0],
-        preferredTime: ''
       }));
     }
-  }, [formData.serviceType]);
+  }, [formData.preferredDate]);
 
-  // Pricing calculator
+  // Pricing calculator for notary services
   const calculatePrice = () => {
-    const basePrices = {
-      regular: 45,
-      emergency: 50,
-      bulk: 79
+    const servicePrices = {
+      general: 15,        // $15 per signature
+      loan_signing: 175,  // $175 average for loan documents ($100-$250 range)
+      estate_planning: 260, // $260 average for estate planning ($120-$400 range)
     };
 
-    const bagPricing = {
-      '1-5': 0,
-      '6-10': 5,
-      '11+': 10
-    };
+    const basePrice = servicePrices[formData.serviceType] || 0;
+    const signerCount = formData.signers.filter(s => s.name && s.email).length;
+    const documentCount = formData.documentCount || 1;
 
-    const emergencyTimeFees = {
-      'Next 2 hours': 10,
-      'Next 4 hours': 5,
-      'Today by 6 PM': 0
-    };
+    if (formData.serviceType === 'general') {
+      // General notary: $15 per signature + $10 service fee
+      return (basePrice * Math.max(documentCount, signerCount)) + 10;
+    } else if (formData.serviceType === 'loan_signing') {
+      // Loan documents: base price varies by complexity
+      let loanPrice = basePrice;
+      if (documentCount > 10) {
+        loanPrice += 25; // Additional fee for complex packages
+      }
+      return loanPrice;
+    } else if (formData.serviceType === 'estate_planning') {
+      // Estate planning: base price varies by complexity
+      let estatePrice = basePrice;
+      if (documentCount > 5) {
+        estatePrice += 50; // Additional fee for complex estate planning
+      }
+      return estatePrice;
+    }
 
-    const basePrice = basePrices[formData.serviceType];
-    const bagSurcharge = bagPricing[formData.bagCount];
-    const urgentFee = formData.urgentPickup ? 15 : 0;
-    
-    const emergencyTimeFee = formData.serviceType === 'emergency' && formData.preferredTime 
-      ? (emergencyTimeFees[formData.preferredTime] || 0) 
-      : 0;
-
-    return basePrice + bagSurcharge + urgentFee + emergencyTimeFee;
+    return basePrice;
   };
 
   const handleInputChange = (e) => {
@@ -77,37 +73,68 @@ const BookingFormWithPayment = () => {
     }));
   };
 
+  const handleSignerChange = (index, field, value) => {
+    const newSigners = [...formData.signers];
+    newSigners[index][field] = value;
+    setFormData(prev => ({ ...prev, signers: newSigners }));
+  };
+
+  const addSigner = () => {
+    setFormData(prev => ({
+      ...prev,
+      signers: [...prev.signers, { name: '', email: '', phone: '' }]
+    }));
+  };
+
+  const removeSigner = (index) => {
+    if (formData.signers.length > 1) {
+      const newSigners = formData.signers.filter((_, i) => i !== index);
+      setFormData(prev => ({ ...prev, signers: newSigners }));
+    }
+  };
+
+  const nextStep = () => {
+    if (validateCurrentStep()) {
+      setCurrentStep(prev => prev + 1);
+    }
+  };
+
+  const prevStep = () => {
+    setCurrentStep(prev => prev - 1);
+  };
+
+  const validateCurrentStep = () => {
+    switch (currentStep) {
+      case 1: // Signers
+        return formData.signers.every(s => s.name && s.email);
+      case 2: // Schedule
+        return formData.preferredDate && formData.preferredTime;
+      default:
+        return true;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      const submissionData = { ...formData };
+      const submissionData = { 
+        ...formData, 
+        price: calculatePrice(),
+        documentCount: formData.documentCount,
+        signerCount: formData.signers.filter(s => s.name && s.email).length
+      };
       
-      if (submissionData.preferredDate && submissionData.preferredDate.trim() !== '') {
-        const dateObj = new Date(submissionData.preferredDate);
-        if (!isNaN(dateObj.getTime())) {
-          submissionData.preferredDate = dateObj.toISOString().split('T')[0];
-        } else {
-          delete submissionData.preferredDate;
-        }
-      } else {
-        delete submissionData.preferredDate;
-      }
-      
-      if (!submissionData.preferredTime || submissionData.preferredTime.trim() === '') {
-        delete submissionData.preferredTime;
-      }
-
       const response = await ApiService.createBooking(submissionData);
       
       if (response.success) {
         setBookingData(response.data);
-        setBookingId(response.data._id); // Use MongoDB _id for payment
+        setBookingId(response.data._id);
         setShowPayment(true);
       } else {
-        setError('Failed to create booking. Please try again.');
+        setError(response.message || 'Failed to create booking. Please try again.');
       }
     } catch (err) {
       console.error('Booking submission error:', err);
@@ -152,16 +179,28 @@ const BookingFormWithPayment = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>Service Type:</span>
-                    <span className="font-semibold capitalize">{formData.serviceType}</span>
+                    <span className="font-semibold capitalize">{formData.serviceType.replace('_', ' ')}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Bag Count:</span>
-                    <span className="font-semibold">{formData.bagCount}</span>
+                    <span>Documents:</span>
+                    <span className="font-semibold">{formData.documentCount}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Customer:</span>
-                    <span className="font-semibold">{`${formData.firstName} ${formData.lastName}`}</span>
+                    <span>Signers:</span>
+                    <span className="font-semibold">{formData.signers.filter(s => s.name && s.email).length}</span>
                   </div>
+                  {formData.serviceType === 'general' && (
+                    <div className="flex justify-between text-xs text-blue-700">
+                      <span>Base Price:</span>
+                      <span>${15 * Math.max(formData.documentCount, formData.signers.filter(s => s.name && s.email).length)}</span>
+                    </div>
+                  )}
+                  {formData.serviceType === 'general' && (
+                    <div className="flex justify-between text-xs text-blue-700">
+                      <span>Service Fee:</span>
+                      <span>$10</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-lg font-bold text-green-600">
                     <span>Total Amount:</span>
                     <span>${calculatePrice()}</span>
@@ -169,7 +208,7 @@ const BookingFormWithPayment = () => {
                 </div>
               </div>
 
-              {/* Temporarily disabled PaymentForm */}
+              {/* Payment Form Placeholder */}
               <div className="max-w-md mx-auto">
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
@@ -185,7 +224,7 @@ const BookingFormWithPayment = () => {
 
                   <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
                     <p className="text-sm text-yellow-700">
-                      Payment system is not configured. Please contact support or pay on delivery.
+                      Payment system is a demo. No real charges will be made.
                     </p>
                   </div>
 
@@ -193,18 +232,9 @@ const BookingFormWithPayment = () => {
                     onClick={() => handlePaymentSuccess({ status: 'succeeded' })}
                     className="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 transition-colors"
                   >
-                    Continue with Cash on Delivery
+                    Confirm Booking (Demo)
                   </button>
                 </div>
-              </div>
-
-              <div className="mt-6 text-center">
-                <button
-                  onClick={handleSkipPayment}
-                  className="text-gray-500 hover:text-gray-700 underline text-sm"
-                >
-                  Pay later (cash on delivery)
-                </button>
               </div>
             </div>
           </div>
@@ -220,19 +250,16 @@ const BookingFormWithPayment = () => {
           <div className="max-w-2xl mx-auto">
             <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
               <div className="mb-6">
-                <div className="bg-success-100 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                  <svg className="h-10 w-10 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-green-100 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                  <svg className="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                  {paymentSuccess ? 'Payment & Booking Confirmed!' : 'Booking Confirmed!'}
+                  Booking Confirmed!
                 </h2>
                 <p className="text-gray-600">
-                  {paymentSuccess 
-                    ? 'Your payment has been processed and pickup is scheduled'
-                    : 'Your waste pickup has been scheduled'
-                  }
+                  Your notary session has been scheduled.
                 </p>
               </div>
 
@@ -241,11 +268,11 @@ const BookingFormWithPayment = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Booking ID:</span>
-                    <span className="font-bold text-primary-600">{bookingData?.bookingId}</span>
+                    <span className="font-bold text-blue-600">{bookingData?.bookingId}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Service:</span>
-                    <span className="font-semibold capitalize">{formData.serviceType}</span>
+                    <span className="font-semibold capitalize">{formData.serviceType.replace('_', ' ')}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Total Cost:</span>
@@ -254,31 +281,31 @@ const BookingFormWithPayment = () => {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Payment Status:</span>
                     <span className={`font-semibold ${paymentSuccess ? 'text-green-600' : 'text-orange-600'}`}>
-                      {paymentSuccess ? 'Paid' : 'Pending'}
+                      {paymentSuccess ? 'Paid (Demo)' : 'Pending'}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Contact:</span>
-                    <span className="font-semibold">{`${formData.firstName} ${formData.lastName}`}</span>
+                    <span className="font-semibold">{`${formData.signers[0]?.name || 'N/A'}`}</span>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className="bg-emergency-50 border border-emergency-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-emergency-800 mb-2">Next Steps</h4>
-                  <ul className="text-sm text-emergency-700 space-y-1 text-left">
-                    <li>• SMS confirmation sent to {formData.phone}</li>
-                    <li>• Driver will call 30 minutes before arrival</li>
-                    <li>• Place bags at designated pickup location</li>
-                    {!paymentSuccess && <li>• Payment due on service completion</li>}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-blue-800 mb-2">Next Steps</h4>
+                  <ul className="text-sm text-blue-700 space-y-1 text-left">
+                    <li>• A confirmation email has been sent to {formData.signers[0]?.email}</li>
+                    <li>• Our team will contact you to collect your documents for review.</li>
+                    <li>• You will receive a link to join the video session before your appointment.</li>
+                    <li>• Please have a valid ID ready for the session.</li>
                   </ul>
                 </div>
 
                 <div className="text-center">
-                  <p className="text-gray-600 mb-4">Need immediate assistance?</p>
-                  <a href="tel:+1-800-RAPID-WASTE" className="btn-emergency inline-block">
-                    Call Emergency Hotline
+                  <p className="text-gray-600 mb-4">Need assistance?</p>
+                  <a href="tel:+1-888-NOTARY-NOW" className="btn-primary inline-block">
+                    Call Support
                   </a>
                 </div>
               </div>
@@ -289,265 +316,293 @@ const BookingFormWithPayment = () => {
     );
   }
 
+  const steps = [
+    { number: 1, title: 'Add Signers', description: 'Enter information for all signers' },
+    { number: 2, title: 'Schedule Session', description: 'Choose your preferred date and time' },
+    { number: 3, title: 'Review & Pay', description: 'Review details and complete payment' }
+  ];
+
   return (
     <section id="booking" className="py-20 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Book Your <span className="text-gradient">Pickup Service</span>
+              Book Your <span className="text-gradient-blue">Notary Session</span>
             </h2>
             <p className="text-lg text-gray-600">
-              Secure online booking with instant payment processing
+              Complete the form below to schedule your online notarization session. Our team will collect your documents after booking.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg p-8 space-y-6">
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Personal Information</h3>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      className="input-field"
-                      placeholder="First Name"
-                      required
-                    />
-                    <input
-                      type="text"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      className="input-field"
-                      placeholder="Last Name"
-                      required
-                    />
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="input-field"
-                      placeholder="Email"
-                      required
-                    />
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="input-field"
-                      placeholder="Phone"
-                      required
-                    />
+          {/* Step Indicator */}
+          <div className="mb-8">
+            <div className="flex items-center justify-center space-x-8">
+              {steps.map((step, index) => (
+                <div key={step.number} className="flex items-center">
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+                    currentStep >= step.number 
+                      ? 'bg-blue-600 border-blue-600 text-white' 
+                      : 'bg-white border-gray-300 text-gray-500'
+                  }`}>
+                    {currentStep > step.number ? (
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      step.number
+                    )}
                   </div>
+                  {index < steps.length - 1 && (
+                    <div className={`w-16 h-0.5 ${
+                      currentStep > step.number ? 'bg-blue-600' : 'bg-gray-300'
+                    }`}></div>
+                  )}
                 </div>
+              ))}
+            </div>
+            <div className="mt-4 text-center">
+              <h3 className="text-lg font-semibold text-gray-900">{steps[currentStep - 1].title}</h3>
+              <p className="text-gray-600">{steps[currentStep - 1].description}</p>
+            </div>
+          </div>
 
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            {/* Step 1: Add Signers */}
+            {currentStep === 1 && (
+              <div className="space-y-6">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Pickup Address</h3>
-                  <div className="space-y-4">
-                    <input
-                      type="text"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      className="input-field"
-                      placeholder="Street Address"
-                      required
-                    />
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <input
-                        type="text"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        className="input-field"
-                        placeholder="City"
-                        required
-                      />
-                      <input
-                        type="text"
-                        name="zipCode"
-                        value={formData.zipCode}
-                        onChange={handleInputChange}
-                        className="input-field"
-                        placeholder="ZIP Code"
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Service Details</h3>
-                  <div className="space-y-4">
-                    <select
-                      name="serviceType"
-                      value={formData.serviceType}
-                      onChange={handleInputChange}
-                      className="input-field"
-                      required
-                    >
-                      <option value="emergency">Emergency Same-Day ($50 base)</option>
-                      <option value="regular">Regular Pickup ($45 base)</option>
-                      <option value="bulk">Bulk Item Removal ($79 base)</option>
-                    </select>
-
-                    <select
-                      name="bagCount"
-                      value={formData.bagCount}
-                      onChange={handleInputChange}
-                      className="input-field"
-                    >
-                      <option value="1-5">1-5 bags (Base rate)</option>
-                      <option value="6-10">6-10 bags (+$5)</option>
-                      <option value="11+">11+ bags (+$10)</option>
-                    </select>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {formData.serviceType === 'emergency' ? 'Pickup Date (Today)' : 'Preferred Pickup Date *'}
-                        </label>
-                        <input
-                          type="date"
-                          name="preferredDate"
-                          value={formData.preferredDate || (formData.serviceType === 'emergency' ? new Date().toISOString().split('T')[0] : '')}
-                          onChange={handleInputChange}
-                          className="input-field"
-                          min={new Date().toISOString().split('T')[0]}
-                          max={formData.serviceType === 'emergency' ? new Date().toISOString().split('T')[0] : undefined}
-                          required={formData.serviceType !== 'emergency'}
-                          disabled={formData.serviceType === 'emergency'}
-                        />
-                        {formData.serviceType === 'emergency' && (
-                          <p className="text-sm text-orange-600 mt-1">Emergency pickups are scheduled for today</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Add Signers</h3>
+                  <p className="text-gray-600 mb-4">Enter information for all individuals who need to sign the documents.</p>
+                  
+                  {formData.signers.map((signer, index) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4 mb-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium text-gray-900">Signer {index + 1}</h4>
+                        {formData.signers.length > 1 && (
+                          <button
+                            onClick={() => removeSigner(index)}
+                            className="text-red-600 hover:text-red-800 text-sm"
+                          >
+                            Remove
+                          </button>
                         )}
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {formData.serviceType === 'emergency' ? 'Preferred Time Slot *' : 'Preferred Time'}
-                        </label>
-                        <select
-                          name="preferredTime"
-                          value={formData.preferredTime}
-                          onChange={handleInputChange}
+                      <div className="grid md:grid-cols-3 gap-4">
+                        <input
+                          type="text"
+                          placeholder="Full Name"
+                          value={signer.name}
+                          onChange={(e) => handleSignerChange(index, 'name', e.target.value)}
                           className="input-field"
-                          required={formData.serviceType === 'emergency'}
-                        >
-                          <option value="">{formData.serviceType === 'emergency' ? 'Select time slot' : 'Any time'}</option>
-                          {formData.serviceType === 'emergency' ? (
-                            <>
-                              <option value="Next 2 hours">Next 2 hours (+$10)</option>
-                              <option value="Next 4 hours">Next 4 hours (+$5)</option>
-                              <option value="Today by 6 PM">Today by 6 PM (standard)</option>
-                            </>
-                          ) : (
-                            <>
-                              <option value="8:00 AM">8:00 AM - 10:00 AM</option>
-                              <option value="10:00 AM">10:00 AM - 12:00 PM</option>
-                              <option value="12:00 PM">12:00 PM - 2:00 PM</option>
-                              <option value="2:00 PM">2:00 PM - 4:00 PM</option>
-                              <option value="4:00 PM">4:00 PM - 6:00 PM</option>
-                            </>
-                          )}
-                        </select>
+                          required
+                        />
+                        <input
+                          type="email"
+                          placeholder="Email"
+                          value={signer.email}
+                          onChange={(e) => handleSignerChange(index, 'email', e.target.value)}
+                          className="input-field"
+                          required
+                        />
+                        <input
+                          type="tel"
+                          placeholder="Phone"
+                          value={signer.phone}
+                          onChange={(e) => handleSignerChange(index, 'phone', e.target.value)}
+                          className="input-field"
+                        />
                       </div>
                     </div>
+                  ))}
+                  
+                  <button
+                    onClick={addSigner}
+                    className="text-blue-600 hover:text-blue-800 font-medium flex items-center space-x-2"
+                  >
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    <span>Add Another Signer</span>
+                  </button>
+                </div>
 
+                <div className="flex justify-end">
+                  <button
+                    onClick={nextStep}
+                    disabled={!formData.signers.every(s => s.name && s.email)}
+                    className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next: Schedule Session
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Schedule Session */}
+            {currentStep === 2 && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Schedule Your Session</h3>
+                  <p className="text-gray-600 mb-4">Choose your preferred date and time for the notarization session.</p>
+                  
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Service Type</label>
+                      <select
+                        name="serviceType"
+                        value={formData.serviceType}
+                        onChange={handleInputChange}
+                        className="input-field"
+                        required
+                      >
+                        <option value="general">General Notary Work ($15 per signature)</option>
+                        <option value="loan_signing">Loan Documents ($100-$250)</option>
+                        <option value="estate_planning">Estate Planning ($120-$400)</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Number of Documents</label>
+                      <input
+                        type="number"
+                        name="documentCount"
+                        value={formData.documentCount}
+                        onChange={handleInputChange}
+                        className="input-field"
+                        min="1"
+                        max="50"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid md:grid-cols-2 gap-6 mt-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Number of Witnesses</label>
+                      <input
+                        type="number"
+                        name="witnesses"
+                        value={formData.witnesses}
+                        onChange={handleInputChange}
+                        className="input-field"
+                        min="0"
+                        max="5"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Date</label>
+                      <input
+                        type="date"
+                        name="preferredDate"
+                        value={formData.preferredDate}
+                        onChange={handleInputChange}
+                        className="input-field"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid md:grid-cols-2 gap-6 mt-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Time</label>
+                      <input
+                        type="time"
+                        name="preferredTime"
+                        value={formData.preferredTime}
+                        onChange={handleInputChange}
+                        className="input-field"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Special Instructions</label>
                     <textarea
                       name="specialInstructions"
                       value={formData.specialInstructions}
                       onChange={handleInputChange}
-                      rows={4}
                       className="input-field"
-                      placeholder="Special Instructions for Driver"
-                    />
+                      placeholder="Any special requirements or notes for the notary..."
+                      rows="3"
+                    ></textarea>
                   </div>
                 </div>
 
-                {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                    <div className="flex items-center">
-                      <svg className="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                      <span className="text-red-700 text-sm">{error}</span>
-                    </div>
-                  </div>
-                )}
+                <div className="flex justify-between">
+                  <button onClick={prevStep} className="btn-secondary">
+                    Previous
+                  </button>
+                  <button
+                    onClick={nextStep}
+                    disabled={!formData.preferredDate || !formData.preferredTime}
+                    className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next: Review & Pay
+                  </button>
+                </div>
+              </div>
+            )}
 
-                <button 
-                  type="submit" 
-                  disabled={loading}
-                  className={`w-full text-lg py-3 px-6 rounded-lg font-semibold transition-colors duration-200 ${
-                    loading 
-                      ? 'bg-gray-400 cursor-not-allowed text-white' 
-                      : 'bg-emergency-600 hover:bg-emergency-700 text-white'
-                  }`}
-                >
-                  {loading ? (
-                    <div className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Creating Booking...
+            {/* Step 3: Review & Pay */}
+            {currentStep === 3 && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Review Your Booking</h3>
+                  <p className="text-gray-600 mb-6">Please review all the details before proceeding to payment.</p>
+                  
+                  <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-3">Documents ({formData.documentCount})</h4>
+                        <p className="text-sm text-gray-500 italic">Documents will be collected by our team after booking</p>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-3">Signers ({formData.signers.filter(s => s.name && s.email).length})</h4>
+                        <ul className="space-y-1">
+                          {formData.signers.filter(s => s.name && s.email).map((signer, index) => (
+                            <li key={index} className="text-sm text-gray-600">
+                              {signer.name} ({signer.email})
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
-                  ) : (
-                    `Book Service - $${calculatePrice()}`
-                  )}
-                </button>
-              </form>
-            </div>
-
-            <div className="space-y-6">
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Pricing Summary</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Base Service</span>
-                    <span className="font-semibold">
-                      ${formData.serviceType === 'emergency' ? '50' : 
-                        formData.serviceType === 'bulk' ? '79' : '45'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Bag Count ({formData.bagCount})</span>
-                    <span className="font-semibold">
-                      +${formData.bagCount === '6-10' ? '5' : 
-                          formData.bagCount === '11+' ? '10' : '0'}
-                    </span>
-                  </div>
-                  {formData.serviceType === 'emergency' && formData.preferredTime && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Time Slot Fee</span>
-                      <span className="font-semibold">
-                        +${formData.preferredTime === 'Next 2 hours' ? '10' : 
-                            formData.preferredTime === 'Next 4 hours' ? '5' : '0'}
-                      </span>
-                    </div>
-                  )}
-                  <div className="border-t border-gray-200 pt-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-lg font-bold text-gray-900">Total</span>
-                      <span className="text-2xl font-bold text-primary-600">${calculatePrice()}</span>
+                    
+                    <div className="border-t pt-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Service Type:</span>
+                        <span className="font-semibold capitalize">{formData.serviceType.replace('_', ' ')}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Date & Time:</span>
+                        <span className="font-semibold">{formData.preferredDate} at {formData.preferredTime}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-lg font-bold text-blue-600">
+                        <span>Total Amount:</span>
+                        <span>${calculatePrice()}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-semibold text-blue-900 mb-2">Secure Payment</h4>
-                <p className="text-sm text-blue-700">
-                  Your payment is processed securely through Stripe. We accept all major credit cards.
-                </p>
+                <div className="flex justify-between">
+                  <button onClick={prevStep} className="btn-secondary">
+                    Previous
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    className="btn-primary"
+                  >
+                    {loading ? 'Processing...' : `Proceed to Payment - $${calculatePrice()}`}
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -555,4 +610,4 @@ const BookingFormWithPayment = () => {
   );
 };
 
-export default BookingFormWithPayment; 
+export default BookingFormWithPayment;

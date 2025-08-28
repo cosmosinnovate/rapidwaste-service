@@ -235,12 +235,12 @@ class ApiService {
     return this.request(endpoint);
   }
 
-  // Driver methods
-  async getDriverDashboard(driverId) {
-    return this.request(`/drivers/${driverId}/dashboard`);
+  // Notary methods
+  async getNotaryDashboard(notaryId) {
+    return this.request(`/notary/${notaryId}/dashboard`);
   }
 
-  async getDriverBookings(driverId, filters = {}) {
+  async getNotaryBookings(notaryId, filters = {}) {
     const queryParams = new URLSearchParams();
     
     Object.entries(filters).forEach(([key, value]) => {
@@ -248,28 +248,40 @@ class ApiService {
     });
 
     const endpoint = queryParams.toString() 
-      ? `/drivers/${driverId}/bookings?${queryParams.toString()}` 
-      : `/drivers/${driverId}/bookings`;
+      ? `/notary/${notaryId}/bookings?${queryParams.toString()}` 
+      : `/notary/${notaryId}/bookings`;
 
     return this.request(endpoint);
   }
 
+  async getAvailableNotaries() {
+    return this.request('/notary/available');
+  }
+
+  // Legacy driver methods (kept for compatibility but deprecated)
+  async getDriverDashboard(driverId) {
+    console.warn('getDriverDashboard is deprecated, use getNotaryDashboard instead');
+    return this.getNotaryDashboard(driverId);
+  }
+
+  async getDriverBookings(driverId, filters = {}) {
+    console.warn('getDriverBookings is deprecated, use getNotaryBookings instead');
+    return this.getNotaryBookings(driverId, filters);
+  }
+
   async updateDriverStatus(driverId, status) {
-    return this.request(`/drivers/${driverId}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
-    });
+    console.warn('updateDriverStatus is deprecated, notary status updates not implemented');
+    throw new Error('Driver status updates not supported in notary service');
   }
 
   async updateDriverLocation(driverId, location) {
-    return this.request(`/drivers/${driverId}/location`, {
-      method: 'PATCH',
-      body: JSON.stringify(location),
-    });
+    console.warn('updateDriverLocation is deprecated, notary location updates not implemented');
+    throw new Error('Driver location updates not supported in notary service');
   }
 
   async getAvailableDrivers() {
-    return this.request('/drivers/available');
+    console.warn('getAvailableDrivers is deprecated, use getAvailableNotaries instead');
+    return this.getAvailableNotaries();
   }
 
   // User methods

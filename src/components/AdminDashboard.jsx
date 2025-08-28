@@ -7,7 +7,7 @@ const AdminDashboard = () => {
   const { user, logout, isAuthenticated, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [bookings, setBookings] = useState([]);
-  const [drivers, setDrivers] = useState([]);
+  const [notaries, setNotaries] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -16,16 +16,15 @@ const AdminDashboard = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedDate, setSelectedDate] = useState('');
   const [updatingBooking, setUpdatingBooking] = useState(null);
-  const [assigningDriver, setAssigningDriver] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
 
   const validateStatusTransition = (currentStatus, newStatus) => {
     const validTransitions = {
-      pending: ['scheduled', 'cancelled'],
-      scheduled: ['in-progress', 'cancelled'],
-      'in-progress': ['completed', 'cancelled'],
-      completed: [],
-      cancelled: [],
+      pending: ['scheduled', 'canceled'],
+      scheduled: ['session-active', 'canceled'],
+      'session-active': ['documents-ready', 'canceled'],
+      'documents-ready': [],
+      canceled: [],
     };
 
     return validTransitions[currentStatus]?.includes(newStatus);
@@ -34,9 +33,9 @@ const AdminDashboard = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'scheduled': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'in-progress': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'completed': return 'bg-green-100 text-green-800 border-green-200';
-      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
+      case 'session-active': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'documents-ready': return 'bg-green-100 text-green-800 border-green-200';
+      case 'canceled': return 'bg-red-100 text-red-800 border-red-200';
       case 'pending': return 'bg-orange-100 text-orange-800 border-orange-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -44,22 +43,28 @@ const AdminDashboard = () => {
 
   const getServiceIcon = (serviceType) => {
     switch (serviceType) {
-      case 'emergency':
+      case 'general':
         return (
-          <svg className="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.732 18.5c-.77.833-.192 2.5 1.732 2.5z" />
+          <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         );
-      case 'bulk':
+      case 'loan_signing':
+        return (
+          <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          </svg>
+        );
+      case 'estate_planning':
         return (
           <svg className="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
           </svg>
         );
       default:
         return (
-          <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
           </svg>
         );
     }
@@ -79,37 +84,37 @@ const AdminDashboard = () => {
       const allBookings = bookingsResponse.data || [];
       setBookings(allBookings);
 
-      // Fetch drivers
-      console.log('Fetching drivers...');
-      const driversResponse = await ApiService.getAllDrivers();
-      console.log('Drivers response:', driversResponse);
-      setDrivers(driversResponse.data || []);
+      // Fetch notaries
+      console.log('Fetching notaries...');
+      const notariesResponse = await ApiService.getAvailableNotaries();
+      console.log('Notaries response:', notariesResponse);
+      setNotaries(notariesResponse.data || []);
 
       // Calculate stats
       console.log('Calculating stats with bookings:', allBookings.length);
       const totalBookings = allBookings.length;
       const pendingBookings = allBookings.filter(b => b.status === 'pending').length;
-      const inProgressBookings = allBookings.filter(b => b.status === 'in-progress').length;
+      const activeSessions = allBookings.filter(b => b.status === 'session-active').length;
       const completedToday = allBookings.filter(b => {
         const today = new Date().toISOString().split('T')[0];
         const bookingDate = new Date(b.preferredDate).toISOString().split('T')[0];
-        return b.status === 'completed' && bookingDate === today;
+        return b.status === 'documents-ready' && bookingDate === today;
       }).length;
 
       const totalRevenue = allBookings
-        .filter(b => b.status === 'completed')
-        .reduce((sum, b) => sum + (b.estimatedPrice || 0), 0);
+        .filter(b => b.status === 'documents-ready')
+        .reduce((sum, b) => sum + (b.price || 0), 0);
 
-      const activeDrivers = driversResponse.data?.filter(d => d.status === 'available').length || 0;
+      const availableNotaries = notariesResponse.data?.filter(n => n.isActive !== false).length || 0;
 
       const calculatedData = {
         totalBookings,
         pendingBookings,
-        inProgressBookings,
+        activeSessions,
         completedToday,
         totalRevenue,
-        activeDrivers,
-        totalDrivers: driversResponse.data?.length || 0,
+        availableNotaries,
+        totalNotaries: notariesResponse.data?.length || 0,
       };
       
       console.log('Calculated dashboard data:', calculatedData);
@@ -123,30 +128,12 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleAssignDriver = async (bookingId, driverId) => {
-    try {
-      setAssigningDriver(bookingId);
-      setError('');
-      setSuccessMessage('');
-      await ApiService.assignDriver(bookingId, driverId);
-      await fetchDashboardData(); // Refresh data
-      setAssigningDriver(null);
-      setSuccessMessage('Driver assigned successfully!');
-      setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (error) {
-      console.error('Error assigning driver:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Unknown error occurred';
-      setError(`Failed to assign driver: ${errorMessage}`);
-      setAssigningDriver(null);
-    }
-  };
-
   const handleUpdateBookingStatus = async (bookingId, status, retryCount = 0) => {
     const booking = bookings.find(b => b._id === bookingId);
     
     // Validate status transition
     if (booking && !validateStatusTransition(booking.status, status)) {
-      setError(`Invalid status transition from ${booking.status} to ${status}. Please follow the correct workflow: pending → scheduled → in-progress → completed`);
+      setError(`Invalid status transition from ${booking.status} to ${status}. Please follow the correct workflow: pending → scheduled → session-active → documents-ready`);
       return;
     }
 
@@ -157,12 +144,12 @@ const AdminDashboard = () => {
       
       // Add contextual data based on status
       const additionalData = {};
-      if (status === 'completed') {
-        additionalData.driverNotes = 'Status updated by admin';
-      } else if (status === 'in-progress') {
-        additionalData.driverNotes = 'Pickup started by admin';
-      } else if (status === 'cancelled') {
-        additionalData.driverNotes = 'Booking cancelled by admin';
+      if (status === 'documents-ready') {
+        additionalData.adminNotes = 'Notarization completed by admin';
+      } else if (status === 'session-active') {
+        additionalData.adminNotes = 'Notary session started by admin';
+      } else if (status === 'canceled') {
+        additionalData.adminNotes = 'Booking cancelled by admin';
       }
       
       await ApiService.updateBookingStatus(bookingId, status, additionalData);
@@ -242,6 +229,8 @@ const AdminDashboard = () => {
     return statusMatch && dateMatch;
   });
 
+  console.log('bookings', bookings);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -249,7 +238,7 @@ const AdminDashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+              <h1 className="text-3xl font-bold text-gray-900">NotaryNow Admin Dashboard</h1>
               <p className="text-gray-600">Welcome, {user?.firstName} {user?.lastName}</p>
             </div>
             <button
@@ -268,8 +257,8 @@ const AdminDashboard = () => {
           <nav className="-mb-px flex space-x-8">
             {[
               { id: 'overview', name: 'Overview', icon: 'home' },
-              { id: 'bookings', name: 'Bookings', icon: 'clipboard' },
-              { id: 'drivers', name: 'Drivers', icon: 'truck' },
+              { id: 'bookings', name: 'Notarization Sessions', icon: 'clipboard' },
+              { id: 'notaries', name: 'Notaries', icon: 'user-check' },
               { id: 'customers', name: 'Customers', icon: 'users' },
             ].map((tab) => (
               <button
@@ -328,7 +317,7 @@ const AdminDashboard = () => {
               <div className="bg-gray-100 p-4 rounded text-sm">
                 <p>Debug: dashboardData = {dashboardData ? 'loaded' : 'null'}</p>
                 <p>Debug: bookings count = {bookings.length}</p>
-                <p>Debug: drivers count = {drivers.length}</p>
+                <p>Debug: notaries count = {notaries.length}</p>
               </div>
             )}
             
@@ -344,7 +333,7 @@ const AdminDashboard = () => {
                     </div>
                     <div className="ml-5 w-0 flex-1">
                       <dl>
-                        <dt className="text-sm font-medium text-gray-500 truncate">Total Bookings</dt>
+                        <dt className="text-sm font-medium text-gray-500 truncate">Total Sessions</dt>
                         <dd className="text-lg font-medium text-gray-900">
                           {dashboardData ? dashboardData.totalBookings : bookings.length}
                         </dd>
@@ -364,7 +353,7 @@ const AdminDashboard = () => {
                     </div>
                     <div className="ml-5 w-0 flex-1">
                       <dl>
-                        <dt className="text-sm font-medium text-gray-500 truncate">Pending Bookings</dt>
+                        <dt className="text-sm font-medium text-gray-500 truncate">Pending Sessions</dt>
                         <dd className="text-lg font-medium text-gray-900">
                           {dashboardData ? dashboardData.pendingBookings : bookings.filter(b => b.status === 'pending').length}
                         </dd>
@@ -386,7 +375,7 @@ const AdminDashboard = () => {
                       <dl>
                         <dt className="text-sm font-medium text-gray-500 truncate">Total Revenue</dt>
                         <dd className="text-lg font-medium text-gray-900">
-                          ${dashboardData ? dashboardData.totalRevenue : bookings.filter(b => b.status === 'completed').reduce((sum, b) => sum + (b.estimatedPrice || 0), 0)}
+                          ${dashboardData ? dashboardData.totalRevenue : bookings.filter(b => b.status === 'documents-ready').reduce((sum, b) => sum + (b.price || 0), 0)}
                         </dd>
                       </dl>
                     </div>
@@ -399,14 +388,14 @@ const AdminDashboard = () => {
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
                       <svg className="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                       </svg>
                     </div>
                     <div className="ml-5 w-0 flex-1">
                       <dl>
-                        <dt className="text-sm font-medium text-gray-500 truncate">Active Drivers</dt>
+                        <dt className="text-sm font-medium text-gray-500 truncate">Available Notaries</dt>
                         <dd className="text-lg font-medium text-gray-900">
-                          {dashboardData ? `${dashboardData.activeDrivers}/${dashboardData.totalDrivers}` : `${drivers.filter(d => d.status === 'available').length}/${drivers.length}`}
+                          {dashboardData ? `${dashboardData.availableNotaries}/${dashboardData.totalNotaries}` : `${notaries.filter(n => n.isActive !== false).length}/${notaries.length}`}
                         </dd>
                       </dl>
                     </div>
@@ -418,12 +407,12 @@ const AdminDashboard = () => {
             {/* Recent Activity */}
             <div className="bg-white shadow rounded-lg">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">Recent Bookings</h3>
+                <h3 className="text-lg font-medium text-gray-900">Recent Notarization Sessions</h3>
               </div>
               <div className="divide-y divide-gray-200">
                 {bookings.length === 0 ? (
                   <div className="px-6 py-8 text-center text-gray-500">
-                    No bookings found
+                    No notarization sessions found
                   </div>
                 ) : (
                   bookings.slice(0, 5).map((booking) => (
@@ -433,10 +422,10 @@ const AdminDashboard = () => {
                           {getServiceIcon(booking.serviceType)}
                           <div>
                             <p className="text-sm font-medium text-gray-900">
-                              {booking.customerName} - {booking.bookingId}
+                              {booking.firstName} {booking.lastName} - {booking.bookingId}
                             </p>
                             <p className="text-sm text-gray-500">
-                              {booking.serviceType} pickup • {booking.address}
+                              {booking.serviceType} notarization • {booking.address}
                             </p>
                           </div>
                         </div>
@@ -444,7 +433,7 @@ const AdminDashboard = () => {
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(booking.status)}`}>
                             {booking.status}
                           </span>
-                          <span className="text-sm text-gray-500">${booking.estimatedPrice}</span>
+                          <span className="text-sm text-gray-500">${booking.price}</span>
                         </div>
                       </div>
                     </div>
@@ -469,11 +458,11 @@ const AdminDashboard = () => {
                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >
                     <option value="all">All Statuses</option>
-                    <option value="pending">Pending</option>
+                    <option value="pending">New User (Pending)</option>
                     <option value="scheduled">Scheduled</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
+                    <option value="session-active">Processing (Active Session)</option>
+                    <option value="documents-ready">Processed (Ready)</option>
+                    <option value="canceled">Canceled</option>
                   </select>
                 </div>
                 <div>
@@ -503,7 +492,7 @@ const AdminDashboard = () => {
             <div className="bg-white shadow rounded-lg overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Bookings ({filteredBookings.length})
+                  Notarization Sessions ({filteredBookings.length})
                 </h3>
               </div>
               <div className="divide-y divide-gray-200">
@@ -515,7 +504,7 @@ const AdminDashboard = () => {
                           {getServiceIcon(booking.serviceType)}
                           <div>
                             <p className="text-sm font-medium text-gray-900">{booking.bookingId}</p>
-                            <p className="text-sm text-gray-500">{booking.customerName}</p>
+                            <p className="text-sm text-gray-500">{booking.firstName} {booking.lastName}</p>
                           </div>
                         </div>
                       </div>
@@ -534,30 +523,9 @@ const AdminDashboard = () => {
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(booking.status)}`}>
                             {booking.status}
                           </span>
-                          <p className="text-sm text-gray-500">${booking.estimatedPrice}</p>
+                          <p className="text-sm text-gray-500">${booking.price}</p>
                         </div>
                         <div className="space-x-2">
-                          {booking.status === 'pending' && (
-                            <select
-                              onChange={(e) => {
-                                if (e.target.value) {
-                                  handleAssignDriver(booking._id, e.target.value);
-                                }
-                              }}
-                              className="text-xs border border-gray-300 rounded px-2 py-1"
-                              defaultValue=""
-                              disabled={assigningDriver === booking._id}
-                            >
-                              <option value="">
-                                {assigningDriver === booking._id ? 'Assigning...' : 'Assign Driver'}
-                              </option>
-                              {drivers.map((driver) => (
-                                <option key={driver._id} value={driver._id}>
-                                  {driver.firstName} {driver.lastName}
-                                </option>
-                              ))}
-                            </select>
-                          )}
                           <select
                             value={booking.status}
                             onChange={(e) => handleUpdateBookingStatus(booking._id, e.target.value)}
@@ -565,19 +533,19 @@ const AdminDashboard = () => {
                             disabled={updatingBooking === booking._id}
                           >
                             <option value="pending" disabled={!validateStatusTransition(booking.status, 'pending')}>
-                              Pending
+                              New User (Pending)
                             </option>
                             <option value="scheduled" disabled={!validateStatusTransition(booking.status, 'scheduled')}>
                               Scheduled
                             </option>
-                            <option value="in-progress" disabled={!validateStatusTransition(booking.status, 'in-progress')}>
-                              In Progress
+                            <option value="session-active" disabled={!validateStatusTransition(booking.status, 'session-active')}>
+                              Processing (Active Session)
                             </option>
-                            <option value="completed" disabled={!validateStatusTransition(booking.status, 'completed')}>
-                              Completed
+                            <option value="documents-ready" disabled={!validateStatusTransition(booking.status, 'documents-ready')}>
+                              Processed (Ready)
                             </option>
-                            <option value="cancelled" disabled={!validateStatusTransition(booking.status, 'cancelled')}>
-                              Cancelled
+                            <option value="canceled" disabled={!validateStatusTransition(booking.status, 'canceled')}>
+                              Canceled
                             </option>
                           </select>
                           {updatingBooking === booking._id && (
@@ -593,41 +561,41 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Drivers Tab */}
-        {activeTab === 'drivers' && (
+        {/* Notaries Tab */}
+        {activeTab === 'notaries' && (
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Drivers ({drivers.length})</h3>
+              <h3 className="text-lg font-medium text-gray-900">Notaries ({notaries.length})</h3>
             </div>
             <div className="divide-y divide-gray-200">
-              {drivers.map((driver) => (
-                <div key={driver._id} className="px-6 py-4">
+              {notaries.map((notary) => (
+                <div key={notary._id} className="px-6 py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                          <span className="text-sm font-medium text-gray-700">
-                            {driver.firstName?.[0]}{driver.lastName?.[0]}
+                        <div className="h-10 w-10 rounded-full bg-blue-300 flex items-center justify-center">
+                          <span className="text-sm font-medium text-blue-700">
+                            {notary.firstName?.[0]}{notary.lastName?.[0]}
                           </span>
                         </div>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-900">
-                          {driver.firstName} {driver.lastName}
+                          {notary.firstName} {notary.lastName}
                         </p>
-                        <p className="text-sm text-gray-500">ID: {driver.driverId}</p>
+                        <p className="text-sm text-gray-500">{notary.email}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        driver.status === 'available' 
+                        notary.isActive !== false 
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {driver.status || 'active'}
+                        {notary.isActive !== false ? 'Active' : 'Inactive'}
                       </span>
                       <p className="text-sm text-gray-500">
-                        {driver.vehicleInfo?.make} {driver.vehicleInfo?.model}
+                        {notary.phone}
                       </p>
                     </div>
                   </div>
@@ -644,15 +612,16 @@ const AdminDashboard = () => {
               <h3 className="text-lg font-medium text-gray-900">Recent Customers</h3>
             </div>
             <div className="divide-y divide-gray-200">
+
               {Array.from(new Map(
                 bookings.map(booking => [
                   booking.customerId?._id || booking.email,
                   {
                     id: booking.customerId?._id || booking.email,
                     name: booking.customerName,
-                    email: booking.email,
-                    phone: booking.phone,
-                    address: `${booking.address}, ${booking.city}`,
+                    email: booking.customerEmail,
+                    phone: booking.customerPhone,
+                    address: booking.customerAddress,
                     totalBookings: bookings.filter(b => 
                       (b.customerId?._id || b.email) === (booking.customerId?._id || booking.email)
                     ).length,
@@ -679,7 +648,7 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-gray-900">{customer.totalBookings} bookings</p>
+                      <p className="text-sm text-gray-900">{customer.totalBookings} sessions</p>
                       <p className="text-sm text-gray-500">
                         Last: {new Date(customer.lastBooking).toLocaleDateString()}
                       </p>

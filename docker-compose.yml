@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:4.4 # Using a specific version of the MongoDB image
+    container_name: mongo_db # Renamed container for clarity
+    restart: always # Always restart the container if it stops
+    ports:
+      - '27017:27017' # Mapping host port 27017 to container port 27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root # Default root username
+      MONGO_INITDB_ROOT_PASSWORD: root # Default root password
+      MONGO_INITDB_DATABASE: admin # Default database
+    volumes:
+      - mongodb_data:/data/db # Persist data between container restarts
+    networks:
+      - notarynow_network
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  notarynow_network:
+    driver: bridge

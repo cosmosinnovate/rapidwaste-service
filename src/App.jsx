@@ -5,7 +5,7 @@ import Hero from './components/Hero'
 import Services from './components/Services'
 import BookingFormWithPayment from './components/BookingFormWithPayment'
 import Footer from './components/Footer'
-import DriverDashboard from './components/DriverDashboard'
+import NotaryDashboard from './components/NotaryDashboard'
 import AdminDashboard from './components/AdminDashboard'
 
 function AppContent() {
@@ -17,10 +17,10 @@ function AppContent() {
     if (isAdmin) {
       return <AdminDashboard />;
     } else if (isDriver) {
-      return <DriverDashboard />;
+      return <NotaryDashboard />;
     } else {
-      // Default to driver dashboard for backwards compatibility
-      return <DriverDashboard />;
+      // Default to notary dashboard for backwards compatibility
+      return <NotaryDashboard />;
     }
   };
 
@@ -52,14 +52,14 @@ function AppContent() {
           <div className="fixed bottom-4 right-4">
             <button 
               onClick={() => setCurrentView('dashboard')}
-              className="bg-emergency-600 hover:bg-emergency-700 text-white px-4 py-2 rounded-lg shadow-lg font-medium flex items-center space-x-2"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-lg font-medium flex items-center space-x-2"
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               <span>
                 {isAuthenticated 
-                  ? (isAdmin ? 'Admin Portal' : 'Driver Portal')
+                  ? (isAdmin ? 'Admin Portal' : 'Notary Portal')
                   : 'Staff Portal'
                 }
               </span>
