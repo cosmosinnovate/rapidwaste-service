@@ -100,7 +100,6 @@ async function seed() {
           status: 'session-active',
           priority: 'medium',
           price: 55, // $15 per signature + $10 service fee
-          urgentAppointment: false,
         },
         // Loan Signing - Scheduled (assigned to notary)
         {
@@ -120,7 +119,6 @@ async function seed() {
           status: 'scheduled',
           priority: 'high',
           price: 200,
-          urgentAppointment: true,
         },
         // Estate Planning - Completed (assigned to notary)
         {
@@ -140,7 +138,6 @@ async function seed() {
           status: 'documents-ready',
           priority: 'medium',
           price: 320,
-          urgentAppointment: false,
         },
         // General Notary - Pending (assigned to notary)
         {
@@ -160,7 +157,6 @@ async function seed() {
           status: 'pending',
           priority: 'low',
           price: 25,
-          urgentAppointment: false,
         },
         // Loan Signing - Cancelled (assigned to notary)
         {
@@ -180,7 +176,6 @@ async function seed() {
           status: 'canceled',
           priority: 'medium',
           price: 175,
-          urgentAppointment: false,
         },
         // Estate Planning - Scheduled (not assigned - available for assignment)
         {
@@ -200,7 +195,6 @@ async function seed() {
           status: 'scheduled',
           priority: 'high',
           price: 280,
-          urgentAppointment: true,
         },
         // General Notary - In Progress (assigned to notary)
         {
@@ -220,7 +214,6 @@ async function seed() {
           status: 'session-active',
           priority: 'medium',
           price: 40,
-          urgentAppointment: false,
         },
         // Loan Signing - Scheduled (assigned to notary)
         {
@@ -240,7 +233,6 @@ async function seed() {
           status: 'scheduled',
           priority: 'high',
           price: 225,
-          urgentAppointment: true,
         },
         // General Notary - Pending (not assigned - available for assignment)
         {
@@ -260,7 +252,6 @@ async function seed() {
           status: 'pending',
           priority: 'low',
           price: 70,
-          urgentAppointment: false,
         },
       ];
 
@@ -275,9 +266,9 @@ async function seed() {
     console.log('- Admin: admin@notarynow.com / admin123');
     console.log('- Notary: notary@notarynow.com / password123');
     console.log('- Sample notarization sessions with different service types:');
-    console.log('  • General Notary Work ($15 per signature + $10 fee)');
-    console.log('  • Loan Documents ($100-$250 per package)');
-    console.log('  • Estate Planning ($120-$400 per package)');
+    console.log('  • General Notary Work');
+    console.log('  • Loan Documents');
+    console.log('  • Estate Planning');
     console.log('\n🚀 You can now start the backend server!');
 
   } catch (error) {

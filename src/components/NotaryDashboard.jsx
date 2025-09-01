@@ -329,9 +329,9 @@ const NotaryDashboard = () => {
                         <p className="text-gray-600 text-sm">{booking.phone}</p>
                       </div>
                       <div>
-                        <h4 className="font-medium text-gray-900 mb-2">Payment</h4>
-                        <p className="text-gray-600 text-sm">{booking.paymentStatus}</p>
-                        <p className="text-gray-600 text-sm">${booking.estimatedPrice}</p>
+                        <h4 className="font-medium text-gray-900 mb-2">Service</h4>
+                        <p className="text-gray-600 text-sm capitalize">{booking.serviceType?.replace('_', ' ')}</p>
+                        <p className="text-gray-600 text-sm">${booking.price}</p>
                       </div>
                     </div>
 

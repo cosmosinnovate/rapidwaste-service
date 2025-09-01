@@ -1,0 +1,23 @@
+name: notarynow-backend
+services:
+- name: api
+  source_dir: /backend
+  github:
+    repo: your-username/rapidwaste-service
+    branch: main
+  run_command: npm run start:prod
+  environment_slug: node-js
+  instance_count: 2
+  instance_size_slug: basic-xxs
+  http_port: 3000
+  routes:
+  - path: /api
+  envs:
+  - key: NODE_ENV
+    value: production
+  - key: MONGODB_URI
+    value: ${MONGODB_URI}
+  - key: JWT_SECRET
+    value: ${JWT_SECRET}
+  - key: CORS_ORIGIN
+    value: ${CORS_ORIGIN}

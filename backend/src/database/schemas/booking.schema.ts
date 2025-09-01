@@ -68,21 +68,6 @@ export class Booking {
   @Prop({ required: true })
   price: number;
 
-  @Prop({ 
-    enum: ['pending', 'paid', 'failed', 'refunded'], 
-    default: 'pending' 
-  })
-  paymentStatus: string;
-
-  @Prop()
-  paymentMethod?: string;
-
-  @Prop()
-  stripePaymentIntentId?: string;
-
-  @Prop()
-  stripeCustomerId?: string;
-
   @Prop()
   providerSessionId?: string;
 
@@ -91,6 +76,9 @@ export class Booking {
 
   @Prop()
   notes?: string;
+
+  @Prop()
+  adminNotes?: string;
 }
 
 export const BookingSchema = SchemaFactory.createForClass(Booking); 

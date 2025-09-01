@@ -260,8 +260,6 @@ export class BookingsController {
           status: 'documents-ready',
           notes: 'Session completed successfully, documents are notarized.',
           actualPrice: 75.00,
-          paymentMethod: 'credit_card',
-          paymentStatus: 'paid',
         },
       },
     },

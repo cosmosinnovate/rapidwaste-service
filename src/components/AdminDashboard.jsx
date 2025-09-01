@@ -6,15 +6,11 @@ import ApiService from '../services/api';
 // Import modular components
 import OverviewTab from './admin/tabs/OverviewTab';
 import BookingsTab from './admin/tabs/BookingsTab';
-import DocumentsTab from './admin/tabs/DocumentsTab';
 import NotariesTab from './admin/tabs/NotariesTab';
 import CustomersTab from './admin/tabs/CustomersTab';
-import DocumentManagementModal from './admin/modals/DocumentManagementModal';
-import InvoiceGenerationModal from './admin/modals/InvoiceGenerationModal';
 
 // Import utilities
 import { validateStatusTransition } from './admin/utils/statusUtils.jsx';
-import { generateFinalPDF } from './admin/utils/documentUtils.jsx';
 
 const AdminDashboard = () => {
   const { user, logout, isAuthenticated, isAdmin } = useAuth();
@@ -30,31 +26,6 @@ const AdminDashboard = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [updatingBooking, setUpdatingBooking] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
-  const [documents, setDocuments] = useState({
-    // Sample documents for demonstration - in real app, this would come from backend
-    'sample-booking-1': [
-      {
-        id: 1,
-        name: 'Power_of_Attorney.pdf',
-        type: 'application/pdf',
-        size: 2048576,
-        uploadedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-        status: 'uploaded'
-      },
-      {
-        id: 2,
-        name: 'ID_Document.jpg',
-        type: 'image/jpeg',
-        size: 1048576,
-        uploadedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-        status: 'uploaded'
-      }
-    ]
-  });
-  const [showDocumentModal, setShowDocumentModal] = useState(false);
-  const [selectedBookingForDocs, setSelectedBookingForDocs] = useState(null);
-  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
-  const [selectedBookingForInvoice, setSelectedBookingForInvoice] = useState(null);
 
   const fetchDashboardData = async () => {
     try {
@@ -235,7 +206,6 @@ const AdminDashboard = () => {
             {[
               { id: 'overview', name: 'Overview', icon: 'home' },
               { id: 'bookings', name: 'Notarization Sessions', icon: 'clipboard' },
-              { id: 'documents', name: 'Documents & Invoices', icon: 'document' },
               { id: 'notaries', name: 'Notaries', icon: 'user-check' },
               { id: 'customers', name: 'Customers', icon: 'users' },
             ].map((tab) => (
@@ -293,7 +263,6 @@ const AdminDashboard = () => {
             dashboardData={dashboardData}
             bookings={bookings}
             notaries={notaries}
-            documents={documents}
           />
         )}
 
@@ -306,21 +275,6 @@ const AdminDashboard = () => {
             setSelectedDate={setSelectedDate}
             updatingBooking={updatingBooking}
             handleUpdateBookingStatus={handleUpdateBookingStatus}
-            setSelectedBookingForDocs={setSelectedBookingForDocs}
-            setShowDocumentModal={setShowDocumentModal}
-            documents={documents}
-          />
-        )}
-
-        {activeTab === 'documents' && (
-          <DocumentsTab 
-            bookings={bookings}
-            documents={documents}
-            setSelectedBookingForDocs={setSelectedBookingForDocs}
-            setShowDocumentModal={setShowDocumentModal}
-            setSelectedBookingForInvoice={setSelectedBookingForInvoice}
-            setShowInvoiceModal={setShowInvoiceModal}
-            generateFinalPDF={(booking) => generateFinalPDF(booking, documents, setSuccessMessage)}
           />
         )}
 
@@ -333,22 +287,7 @@ const AdminDashboard = () => {
         )}
       </div>
 
-      {/* Modals */}
-      <DocumentManagementModal 
-        showDocumentModal={showDocumentModal}
-        selectedBookingForDocs={selectedBookingForDocs}
-        setShowDocumentModal={setShowDocumentModal}
-        documents={documents}
-        setDocuments={setDocuments}
-        setSuccessMessage={setSuccessMessage}
-      />
 
-      <InvoiceGenerationModal 
-        showInvoiceModal={showInvoiceModal}
-        selectedBookingForInvoice={selectedBookingForInvoice}
-        setShowInvoiceModal={setShowInvoiceModal}
-        setSuccessMessage={setSuccessMessage}
-      />
     </div>
   );
 };

@@ -142,19 +142,14 @@ const Services = () => {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6 text-center">
+          <div className="grid md:grid-cols-2 gap-6 text-center">
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <div className="bg-blue-100 text-blue-600 rounded-full h-12 w-12 flex items-center justify-center mx-auto mb-4 font-bold text-xl">1</div>
-              <h4 className="font-semibold text-gray-900 mb-2">Upload Document</h4>
-              <p className="text-sm text-gray-600">Securely upload your document for notarization.</p>
+              <h4 className="font-semibold text-gray-900 mb-2">Book Appointment</h4>
+              <p className="text-sm text-gray-600">Schedule your notarization session online.</p>
             </div>
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <div className="bg-blue-100 text-blue-600 rounded-full h-12 w-12 flex items-center justify-center mx-auto mb-4 font-bold text-xl">2</div>
-              <h4 className="font-semibold text-gray-900 mb-2">Verify Identity</h4>
-              <p className="text-sm text-gray-600">Complete quick identity verification online.</p>
-            </div>
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <div className="bg-blue-100 text-blue-600 rounded-full h-12 w-12 flex items-center justify-center mx-auto mb-4 font-bold text-xl">3</div>
               <h4 className="font-semibold text-gray-900 mb-2">Meet Notary Live</h4>
               <p className="text-sm text-gray-600">Connect with a certified notary via video.</p>
             </div>

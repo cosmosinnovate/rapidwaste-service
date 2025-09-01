@@ -1,7 +1,7 @@
 import React from 'react';
 import { getServiceIcon, getStatusColor } from '../utils/statusUtils.jsx';
 
-const OverviewTab = ({ dashboardData, bookings, notaries, documents }) => {
+const OverviewTab = ({ dashboardData, bookings, notaries }) => {
   return (
     <div className="space-y-6">
       {/* Debug Info */}
@@ -108,11 +108,9 @@ const OverviewTab = ({ dashboardData, bookings, notaries, documents }) => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Documents</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">Total Sessions</dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {Object.keys(documents).reduce((total, bookingId) => 
-                      total + (documents[bookingId]?.length || 0), 0
-                    )}
+                    {bookings.length}
                   </dd>
                 </dl>
               </div>
@@ -130,9 +128,9 @@ const OverviewTab = ({ dashboardData, bookings, notaries, documents }) => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Pending Invoices</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">Completed Sessions</dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {bookings.filter(b => b.status === 'documents-ready' && b.paymentStatus === 'paid').length}
+                    {bookings.filter(b => b.status === 'documents-ready').length}
                   </dd>
                 </dl>
               </div>

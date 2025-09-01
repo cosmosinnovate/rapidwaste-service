@@ -1,13 +1,15 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { NotaryModule } from './notary/notary.module';
-import { PaymentsModule } from './payments/payments.module';
+import { TenantsModule } from './tenants/tenants.module';
 import { BookingsGateway } from './gateways/bookings.gateway';
-
+import { TenantMiddlewareModule } from './common/middleware/tenant-middleware.module';
+import { TenantMiddleware } from './common/middleware/tenant.middleware';
+import { Tenant, TenantSchema } from './database/schemas/tenant.schema';
 
 @Module({
   imports: [
@@ -29,12 +31,22 @@ import { BookingsGateway } from './gateways/bookings.gateway';
         },
       }
     ),
+    MongooseModule.forFeature([
+      { name: Tenant.name, schema: TenantSchema }
+    ]),
     AuthModule,
     UsersModule,
     BookingsModule,
     NotaryModule,
-    PaymentsModule,
+    TenantsModule,
+    TenantMiddlewareModule,
   ],
   providers: [BookingsGateway],
 })
-export class AppModule {} 
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(TenantMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+} 

@@ -1,5 +1,6 @@
 import { IsEnum, IsOptional, IsString, IsNumber } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class UpdateBookingStatusDto {
   @ApiProperty({
@@ -19,27 +20,20 @@ export class UpdateBookingStatusDto {
   notes?: string;
 
   @ApiPropertyOptional({
+    description: 'Admin notes about the booking',
+    example: 'Booking updated by admin',
+  })
+  @IsOptional()
+  @IsString()
+  adminNotes?: string;
+
+  @ApiPropertyOptional({
     description: 'Final price charged for the service',
     example: 65.50,
     minimum: 0,
   })
   @IsOptional()
-  @IsNumber()
+  @IsNumber({}, { message: 'actualPrice must be a number' })
+  @Transform(({ value }) => parseFloat(value))
   actualPrice?: number;
-
-  @ApiPropertyOptional({
-    description: 'Method of payment used',
-    example: 'credit_card',
-  })
-  @IsOptional()
-  @IsString()
-  paymentMethod?: string;
-
-  @ApiPropertyOptional({
-    description: 'Status of payment',
-    example: 'paid',
-  })
-  @IsOptional()
-  @IsString()
-  paymentStatus?: string;
 } 

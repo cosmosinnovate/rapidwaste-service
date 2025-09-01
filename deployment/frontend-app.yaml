@@ -1,0 +1,19 @@
+name: notarynow-frontend
+services:
+- name: web
+  source_dir: /
+  github:
+    repo: your-username/rapidwaste-service
+    branch: main
+  run_command: npm run build && npm run preview
+  environment_slug: node-js
+  instance_count: 2
+  instance_size_slug: basic-xxs
+  http_port: 4173
+  routes:
+  - path: /
+  envs:
+  - key: VITE_API_URL
+    value: ${VITE_API_URL}
+  - key: VITE_APP_ENV
+    value: production

@@ -1,5 +1,6 @@
 import { IsString, IsEmail, IsEnum, IsOptional, IsBoolean, IsDateString, MinLength, IsNumber, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class CreateBookingDto {
   @ApiProperty({
@@ -73,8 +74,9 @@ export class CreateBookingDto {
     minimum: 1,
   })
   @IsOptional()
-  @IsNumber()
-  @Min(1)
+  @IsNumber({}, { message: 'documentCount must be a number' })
+  @Min(1, { message: 'documentCount must not be less than 1' })
+  @Transform(({ value }) => parseInt(value))
   documentCount?: number;
 
   @ApiPropertyOptional({
@@ -83,8 +85,9 @@ export class CreateBookingDto {
     minimum: 0,
   })
   @IsOptional()
-  @IsNumber()
-  @Min(0)
+  @IsNumber({}, { message: 'witnesses must be a number' })
+  @Min(0, { message: 'witnesses must not be less than 0' })
+  @Transform(({ value }) => parseInt(value))
   witnesses?: number;
 
   @ApiPropertyOptional({
@@ -125,6 +128,7 @@ export class CreateBookingDto {
     description: 'The calculated price of the booking',
     example: 25,
   })
-  @IsNumber()
+  @IsNumber({}, { message: 'price must be a number' })
+  @Transform(({ value }) => parseFloat(value))
   price: number;
 }
