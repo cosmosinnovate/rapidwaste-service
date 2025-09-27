@@ -3,7 +3,7 @@ services:
 - name: web
   source_dir: /
   github:
-    repo: your-username/rapidwaste-service
+    repo: your-username/project-template-service
     branch: main
   run_command: npm run build && npm run preview
   environment_slug: node-js

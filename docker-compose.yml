@@ -14,12 +14,12 @@ services:
     volumes:
       - mongodb_data:/data/db # Persist data between container restarts
     networks:
-      - notarynow_network
+      - notary_now_network
 
 volumes:
   mongodb_data:
     driver: local
 
 networks:
-  notarynow_network:
+  notary_now_network:
     driver: bridge

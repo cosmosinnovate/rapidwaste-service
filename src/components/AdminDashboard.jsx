@@ -8,6 +8,8 @@ import OverviewTab from './admin/tabs/OverviewTab';
 import BookingsTab from './admin/tabs/BookingsTab';
 import NotariesTab from './admin/tabs/NotariesTab';
 import CustomersTab from './admin/tabs/CustomersTab';
+import TenantManagementTab from './admin/TenantManagementTab';
+import TenantOnboardingDashboard from './TenantOnboardingDashboard';
 
 // Import utilities
 import { validateStatusTransition } from './admin/utils/statusUtils.jsx';
@@ -208,6 +210,7 @@ const AdminDashboard = () => {
               { id: 'bookings', name: 'Notarization Sessions', icon: 'clipboard' },
               { id: 'notaries', name: 'Notaries', icon: 'user-check' },
               { id: 'customers', name: 'Customers', icon: 'users' },
+              { id: 'tenants', name: 'Tenants', icon: 'building' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -284,6 +287,10 @@ const AdminDashboard = () => {
 
         {activeTab === 'customers' && (
           <CustomersTab bookings={bookings} />
+        )}
+
+        {activeTab === 'tenants' && (
+          <TenantOnboardingDashboard />
         )}
       </div>
 

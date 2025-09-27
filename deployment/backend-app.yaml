@@ -3,7 +3,7 @@ services:
 - name: api
   source_dir: /backend
   github:
-    repo: your-username/rapidwaste-service
+    repo: your-username/project-template-service
     branch: main
   run_command: npm run start:prod
   environment_slug: node-js

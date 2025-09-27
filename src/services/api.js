@@ -334,6 +334,51 @@ class ApiService {
     return this.request('/users');
   }
 
+  // Tenant Management
+  async getAllTenants() {
+    return this.request('/tenants');
+  }
+
+  async getTenantById(id) {
+    return this.request(`/tenants/${id}`);
+  }
+
+  async createTenant(tenantData) {
+    return this.request('/tenants', {
+      method: 'POST',
+      body: JSON.stringify(tenantData),
+    });
+  }
+
+  async updateTenant(id, tenantData) {
+    return this.request(`/tenants/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(tenantData),
+    });
+  }
+
+  async deleteTenant(id) {
+    return this.request(`/tenants/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async activateTenant(id) {
+    return this.request(`/tenants/${id}/activate`, {
+      method: 'POST',
+    });
+  }
+
+  async deactivateTenant(id) {
+    return this.request(`/tenants/${id}/deactivate`, {
+      method: 'POST',
+    });
+  }
+
+  async getTenantBySubdomain(subdomain) {
+    return this.request(`/tenants/subdomain/${subdomain}`);
+  }
+
 
 }
 

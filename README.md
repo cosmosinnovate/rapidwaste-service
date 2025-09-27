@@ -14,7 +14,7 @@ A full-stack web application for emergency waste pickup services with real-time 
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd rapidwaste-service
+cd project-template-service
 
 # Install dependencies
 npm install
@@ -91,7 +91,7 @@ cd backend && npm run seed
 ## 📱 Application Structure
 
 ```
-rapidwaste-service/
+project-template-service/
 ├── src/                    # Frontend React app
 │   ├── components/        # React components
 │   ├── contexts/          # React contexts

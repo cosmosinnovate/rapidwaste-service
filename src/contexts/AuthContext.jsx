@@ -21,9 +21,9 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeAuth = () => {
       try {
-        const storedToken = localStorage.getItem('rapidwaste_token');
-        const storedRefreshToken = localStorage.getItem('rapidwaste_refresh_token');
-        const storedUser = localStorage.getItem('rapidwaste_user');
+        const storedToken = localStorage.getItem('notary_now_token');
+        const storedRefreshToken = localStorage.getItem('notary_now_refresh_token');
+        const storedUser = localStorage.getItem('notary_now_user');
         
         if (storedToken && storedUser) {
           setToken(storedToken);
@@ -37,9 +37,9 @@ export const AuthProvider = ({ children }) => {
       } catch (error) {
         console.error('Error initializing auth:', error);
         // Clear invalid data
-        localStorage.removeItem('rapidwaste_token');
-        localStorage.removeItem('rapidwaste_refresh_token');
-        localStorage.removeItem('rapidwaste_user');
+        localStorage.removeItem('notary_now_token');
+        localStorage.removeItem('notary_now_refresh_token');
+        localStorage.removeItem('notary_now_user');
       } finally {
         setLoading(false);
       }
@@ -79,9 +79,7 @@ export const AuthProvider = ({ children }) => {
         setUser(userData);
         
         // Store in localStorage
-        localStorage.setItem('rapidwaste_token', access_token);
-        localStorage.setItem('rapidwaste_refresh_token', refresh_token);
-        localStorage.setItem('rapidwaste_user', JSON.stringify(userData));
+        storeAuthData(access_token, refresh_token, userData);
         
         // Set auth tokens for API service
         apiService.setAuthToken(access_token);
@@ -115,9 +113,7 @@ export const AuthProvider = ({ children }) => {
         setUser(newUser);
         
         // Store in localStorage
-        localStorage.setItem('rapidwaste_token', access_token);
-        localStorage.setItem('rapidwaste_refresh_token', refresh_token);
-        localStorage.setItem('rapidwaste_user', JSON.stringify(newUser));
+        storeAuthData(access_token, refresh_token, newUser);
         
         // Set auth tokens for API service
         apiService.setAuthToken(access_token);
@@ -136,17 +132,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const storeAuthData = (access_token, refresh_token, userData) => {
+    // Store in localStorage
+    localStorage.setItem('notary_now_token', access_token);
+    localStorage.setItem('notary_now_refresh_token', refresh_token);
+    localStorage.setItem('notary_now_user', JSON.stringify(userData));
+  };
+
+  const clearLocalStorageAuth = () => {
+    localStorage.removeItem('notary_now_token');
+    localStorage.removeItem('notary_now_refresh_token');
+    localStorage.removeItem('notary_now_user');
+  };
+
   const logout = () => {
     // Clear state
     setUser(null);
     setToken(null);
     setError('');
     
-    // Clear localStorage
-    localStorage.removeItem('rapidwaste_token');
-    localStorage.removeItem('rapidwaste_refresh_token');
-    localStorage.removeItem('rapidwaste_user');
-    
+    clearLocalStorageAuth();
+
     // Remove auth tokens from API service
     apiService.clearAuthToken();
   };

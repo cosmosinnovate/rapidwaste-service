@@ -17,18 +17,27 @@ const Header = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">NotaryNow</h1>
-              <p className="text-sm text-gray-600">Online Notary Service</p>
+              <p className="text-sm text-gray-600">White-Label Platform</p>
             </div>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#home" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Home</a>
-            <a href="#services" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Our Services</a>
-            <a href="#booking" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Book a Session</a>
-            <a href="#contact" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Contact Us</a>
-            <button className="btn-primary">
-              Get Started
+            <a href="#home" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Platform</a>
+            <a href="#services" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Features</a>
+            <a href="#pricing" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Pricing</a>
+            <a href="#testimonials" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Success Stories</a>
+            <button 
+              onClick={() => window.location.hash = '#demo'}
+              className="btn-primary"
+            >
+              Live Demo
+            </button>
+            <button 
+              onClick={() => window.location.hash = '#tenant'}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+            >
+              Tenant Admin
             </button>
           </nav>
 
@@ -51,12 +60,21 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden mt-4 pb-4 border-t border-gray-200">
             <nav className="flex flex-col space-y-4 pt-4">
-              <a href="#home" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Home</a>
-              <a href="#services" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Our Services</a>
-              <a href="#booking" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Book a Session</a>
-              <a href="#contact" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Contact Us</a>
-              <button className="btn-primary w-full">
-                Get Started
+              <a href="#home" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Platform</a>
+              <a href="#services" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Features</a>
+              <a href="#pricing" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Pricing</a>
+              <a href="#testimonials" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Success Stories</a>
+              <button 
+                onClick={() => window.location.hash = '#demo'}
+                className="btn-primary w-full"
+              >
+                Live Demo
+              </button>
+              <button 
+                onClick={() => window.location.hash = '#tenant'}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors w-full"
+              >
+                Tenant Admin
               </button>
             </nav>
           </div>

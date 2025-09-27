@@ -15,13 +15,13 @@ const Footer = () => {
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold">NotaryNow</h3>
-                  <p className="text-gray-400">Online Notary Service</p>
+                  <p className="text-gray-400">White-Label Platform</p>
                 </div>
               </div>
               
               <p className="text-gray-300 mb-6 leading-relaxed">
-                Professional online notary services available 24/7. Our certified notaries provide secure, 
-                legally-binding document notarization from anywhere in the United States.
+                Empower notary businesses with our white-label platform. Launch your branded notary service 
+                with enterprise-grade security and nationwide compliance built-in.
               </p>
 
               <div className="space-y-3">
@@ -46,28 +46,28 @@ const Footer = () => {
               </div>
             </div>
 
-            {/* Services */}
+            {/* Platform Links */}
             <div>
-              <h4 className="text-lg font-bold mb-6">Our Services</h4>
+              <h4 className="text-lg font-bold mb-6">Platform</h4>
               <ul className="space-y-3">
                 <li>
                   <a href="#services" className="text-gray-300 hover:text-white transition-colors">
-                    General Notary Work
+                    Features
                   </a>
                 </li>
                 <li>
-                  <a href="#services" className="text-gray-300 hover:text-white transition-colors">
-                    Loan Documents
+                  <a href="#pricing" className="text-gray-300 hover:text-white transition-colors">
+                    Pricing
                   </a>
                 </li>
                 <li>
-                  <a href="#services" className="text-gray-300 hover:text-white transition-colors">
-                    Estate Planning
+                  <a href="#testimonials" className="text-gray-300 hover:text-white transition-colors">
+                    Success Stories
                   </a>
                 </li>
                 <li>
                   <a href="#booking" className="text-gray-300 hover:text-white transition-colors">
-                    Book Online
+                    Live Demo
                   </a>
                 </li>
               </ul>
@@ -81,18 +81,23 @@ const Footer = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="text-gray-400 text-sm mb-4 md:mb-0">
-              <p>&copy; 2024 NotaryNow Online Services. All rights reserved.</p>
+              <p>&copy; 2024 NotaryNow White-Label Platform. All rights reserved.</p>
+              <div className="flex items-center space-x-4 mt-2">
+                <span className="text-xs bg-gray-800 px-2 py-1 rounded">SOC 2 Compliant</span>
+                <span className="text-xs bg-gray-800 px-2 py-1 rounded">HIPAA Ready</span>
+                <span className="text-xs bg-gray-800 px-2 py-1 rounded">99.9% Uptime</span>
+              </div>
             </div>
             
             <div className="flex items-center space-x-6">
               <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Privacy Policy
+                Partner Portal
               </a>
               <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Terms of Service
+                API Documentation
               </a>
               <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Legal Compliance
+                White-Label Terms
               </a>
             </div>
           </div>

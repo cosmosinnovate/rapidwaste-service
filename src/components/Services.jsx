@@ -1,63 +1,63 @@
 const Services = () => {
-  const services = [
+  const platformFeatures = [
     {
-      id: 'general',
-      name: 'General Notary Work',
-      price: '$15',
-      priceNote: 'per signature + fees',
+      id: 'branded_landing',
+      name: 'Branded Landing Page',
+      badge: 'Your Logo Here',
+      mockup: 'Landing Page Preview',
       icon: (
         <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
       ),
-      description: 'Personal and Professional documents (Ex. Power of Attorney\'s, etc.)',
+      description: 'Professional landing page with your branding, colors, and logo throughout',
       features: [
-        'Oaths & Affirmations',
-        'Acknowledgements',
-        'Certified Copies',
-        'Fast & Secure Sessions'
+        'Custom Logo & Colors',
+        'Your Business Name',
+        'Branded Domain Options',
+        'Mobile Responsive Design'
       ],
-      timeline: '10-15 min session',
+      setup: 'Ready in minutes',
       popular: true
     },
     {
-      id: 'loan_signing',
-      name: 'Loan Documents',
-      price: '$100-$250',
-      priceNote: 'per package',
+      id: 'booking_system',
+      name: 'Booking & Payments',
+      badge: 'Fully Integrated',
+      mockup: 'Booking Flow Preview',
       icon: (
         <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
       ),
-      description: 'First Buyer, HELOC, Refinance, Reverse Mortgage, Seller\'s Package, and more!',
+      description: 'Complete scheduling system with payment processing and client notifications',
       features: [
-        'First Time Buyer Packages',
-        'HELOCs & Refinances',
-        'Reverse Mortgages',
-        'Seller\'s Packages'
+        'Real-time Scheduling',
+        'Payment Processing',
+        'Client Notifications',
+        'Automated Reminders'
       ],
-      timeline: '30-60 min session',
+      setup: 'Plug & play',
       popular: false
     },
     {
-      id: 'estate_planning',
-      name: 'Estate Planning',
-      price: '$120-$400',
-      priceNote: 'per package',
+      id: 'admin_dashboard',
+      name: 'Admin Dashboard',
+      badge: 'Multi-Notary Support',
+      mockup: 'Dashboard Preview',
       icon: (
         <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
       ),
-      description: 'Certified Notary Trust Delivery Agent in handling Estate Planning Notarizations',
+      description: 'Comprehensive management dashboard for notaries and business owners',
       features: [
-        'Trust Documents',
-        'Will Notarizations',
-        'Estate Planning Forms',
-        'Trust Delivery Services'
+        'Appointment Management',
+        'Revenue Analytics',
+        'Client Database',
+        'Performance Reports'
       ],
-      timeline: '45-90 min session',
+      setup: 'Instant access',
       popular: false
     }
   ];
@@ -69,25 +69,26 @@ const Services = () => {
         <div className="text-center mb-16">
           <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
             <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
             </svg>
-            <span>Our Notary Services</span>
+            <span>Platform Showcase</span>
           </div>
           
           <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-            Comprehensive Notary <span className="text-gradient-blue">Solutions</span>
+            A Modern Notary Experience—<span className="text-gradient-blue">With Your Branding</span>
           </h2>
           
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            From simple document notarizations to complex international apostilles, we provide a full range of online services to meet your needs.
+            Screenshots and mockups of the booking flow, pricing table, and customer dashboard with your brand logo watermark. 
+            Add, remove, or customize services with your own pricing strategy.
           </p>
         </div>
 
-        {/* Services Grid */}
+        {/* Platform Features Grid */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
-          {services.map((service) => (
-            <div key={service.id} className={`service-card relative ${service.popular ? 'ring-2 ring-blue-500' : ''}`}>
-              {service.popular && (
+          {platformFeatures.map((feature) => (
+            <div key={feature.id} className={`service-card relative ${feature.popular ? 'ring-2 ring-blue-500' : ''}`}>
+              {feature.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                   <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
                     Most Popular
@@ -96,62 +97,67 @@ const Services = () => {
               )}
               
               <div className="flex items-center space-x-3 mb-6">
-                <div className={`p-3 rounded-lg ${service.popular ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`}>
-                  {service.icon}
+                <div className={`p-3 rounded-lg ${feature.popular ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`}>
+                  {feature.icon}
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">{service.name}</h3>
-                  <p className="text-sm text-gray-600">{service.timeline}</p>
+                  <h3 className="text-xl font-bold text-gray-900">{feature.name}</h3>
+                  <p className="text-sm text-gray-600">{feature.setup}</p>
                 </div>
               </div>
 
               <div className="mb-6">
                 <div className="flex items-baseline space-x-2 mb-2">
-                  <span className="text-3xl font-bold text-gray-900">{service.price}</span>
-                  <span className="text-gray-600">{service.priceNote}</span>
+                  <span className="text-lg font-bold text-blue-600">{feature.badge}</span>
+                  <span className="text-gray-600">{feature.mockup}</span>
                 </div>
-                <p className="text-gray-600">{service.description}</p>
+                <p className="text-gray-600">{feature.description}</p>
               </div>
 
               <ul className="space-y-3 mb-6">
-                {service.features.map((feature, index) => (
+                {feature.features.map((item, index) => (
                   <li key={index} className="flex items-center space-x-3">
                     <svg className="h-5 w-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                    <span className="text-gray-700">{feature}</span>
+                    <span className="text-gray-700">{item}</span>
                   </li>
                 ))}
               </ul>
 
               <div className="mt-auto pt-6 border-t">
                 <div className="text-center text-sm text-gray-600">
-                  <span className="font-medium text-gray-900">{service.timeline}</span>
+                  <span className="font-medium text-gray-900">{feature.setup}</span>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* How it works section */}
+        {/* How it works section - B2B Focus */}
         <div className="bg-gray-50 rounded-2xl p-8">
           <div className="text-center mb-8">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">How It Works</h3>
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">How It Works for Your Business</h3>
             <p className="text-gray-600 max-w-3xl mx-auto">
-              Our simple, 3-step process makes online notarization a breeze.
+              Your customers see your brand, while we handle the technology. A seamless 3-step process for notary business owners.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-6 text-center">
+          <div className="grid md:grid-cols-3 gap-6 text-center">
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <div className="bg-blue-100 text-blue-600 rounded-full h-12 w-12 flex items-center justify-center mx-auto mb-4 font-bold text-xl">1</div>
-              <h4 className="font-semibold text-gray-900 mb-2">Book Appointment</h4>
-              <p className="text-sm text-gray-600">Schedule your notarization session online.</p>
+              <h4 className="font-semibold text-gray-900 mb-2">Setup Your Brand</h4>
+              <p className="text-sm text-gray-600">Add your logo, colors, and business information to create your branded platform.</p>
             </div>
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <div className="bg-blue-100 text-blue-600 rounded-full h-12 w-12 flex items-center justify-center mx-auto mb-4 font-bold text-xl">2</div>
-              <h4 className="font-semibold text-gray-900 mb-2">Meet Notary Live</h4>
-              <p className="text-sm text-gray-600">Connect with a certified notary via video.</p>
+              <h4 className="font-semibold text-gray-900 mb-2">Configure Services</h4>
+              <p className="text-sm text-gray-600">Set your pricing, availability, and service offerings to match your business model.</p>
+            </div>
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="bg-blue-100 text-blue-600 rounded-full h-12 w-12 flex items-center justify-center mx-auto mb-4 font-bold text-xl">3</div>
+              <h4 className="font-semibold text-gray-900 mb-2">Launch & Grow</h4>
+              <p className="text-sm text-gray-600">Go live with your branded notary service and start accepting bookings from day one.</p>
             </div>
           </div>
         </div>
@@ -197,7 +203,7 @@ const Services = () => {
               </div>
             </div>
             <div className="mt-6 text-sm text-gray-600">
-              <p>All prices include secure video session, document preparation, and compliance verification.</p>
+              <p>All prices include secure document preparation, and compliance verification.</p>
               <p className="mt-2">Contact us for custom pricing on large volume or specialized services.</p>
             </div>
           </div>

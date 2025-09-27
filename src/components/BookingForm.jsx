@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react';
 import ApiService from '../services/api';
 
-const BookingForm = () => {
+const BookingForm = ({ 
+  variant = 'full', // 'full' or 'simple'
+  showHeader = true,
+  showSidebar = true,
+  className = '',
+  onSubmitSuccess = null 
+}) => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -28,29 +34,31 @@ const BookingForm = () => {
   // Pricing calculator for notary services
   const calculatePrice = () => {
     const servicePrices = {
-      general: 15,        // $15 per signature
-      loan_signing: 175,  // $175 average for loan documents ($100-$250 range)
-      estate_planning: 260, // $260 average for estate planning ($120-$400 range)
+      general: 25,        // Simplified pricing for demo
+      loan_signing: 175,  
+      estate_planning: 260,
     };
 
-    const basePrice = servicePrices[formData.serviceType] || 0;
+    const basePrice = servicePrices[formData.serviceType] || 25;
+    
+    if (variant === 'simple') {
+      return basePrice; // Simple flat rate for demo
+    }
+
     const documentCount = formData.documentCount || 1;
 
     if (formData.serviceType === 'general') {
-      // General notary: $15 per signature + $10 service fee
-      return (basePrice * documentCount) + 10;
+      return (15 * documentCount) + 10;
     } else if (formData.serviceType === 'loan_signing') {
-      // Loan documents: base price varies by complexity
       let loanPrice = basePrice;
       if (documentCount > 10) {
-        loanPrice += 25; // Additional fee for complex packages
+        loanPrice += 25;
       }
       return loanPrice;
     } else if (formData.serviceType === 'estate_planning') {
-      // Estate planning: base price varies by complexity
       let estatePrice = basePrice;
       if (documentCount > 5) {
-        estatePrice += 50; // Additional fee for complex estate planning
+        estatePrice += 50;
       }
       return estatePrice;
     }
@@ -142,6 +150,11 @@ const BookingForm = () => {
         setBookingData(response.data);
         setBookingId(response.data.bookingId);
         setShowConfirmation(true);
+        
+        // Call custom success handler if provided
+        if (onSubmitSuccess) {
+          onSubmitSuccess(response.data);
+        }
       } else {
         setError('Failed to create booking. Please try again.');
       }
@@ -155,10 +168,10 @@ const BookingForm = () => {
 
   if (showConfirmation) {
     return (
-      <section id="booking" className="py-20 bg-gradient-to-br from-green-50 to-blue-50">
+      <section id="booking" className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-3xl shadow-2xl p-8 text-center">
+            <div className="text-center">
               <div className="mb-8">
                 <div className="bg-gradient-to-r from-green-400 to-blue-500 p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center shadow-lg">
                   <svg className="h-12 w-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,7 +224,7 @@ const BookingForm = () => {
               </div>
 
               <div className="space-y-6">
-                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
+                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 mb-8 text-left">
                   <h4 className="font-semibold text-blue-800 mb-4 flex items-center">
                     <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -223,25 +236,25 @@ const BookingForm = () => {
                       <svg className="w-4 h-4 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span>An email confirmation with the session link will be sent to <strong>{formData.email}</strong></span>
+                      <span>A confirmation email with appointment details will be sent to <strong>{formData.email}</strong></span>
                     </li>
                     <li className="flex items-start">
                       <svg className="w-4 h-4 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span>Please join the session 5 minutes before your scheduled time</span>
+                      <span>Our notary will contact you to confirm the meeting location</span>
                     </li>
                     <li className="flex items-start">
                       <svg className="w-4 h-4 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span>Ensure you have a stable internet connection and a valid ID</span>
+                      <span>Please have a valid government-issued ID ready for the appointment</span>
                     </li>
                     <li className="flex items-start">
                       <svg className="w-4 h-4 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span>Have your documents ready for the notarization session</span>
+                      <span>Have your documents ready and unsigned for the notarization</span>
                     </li>
                   </ul>
                 </div>
@@ -263,21 +276,264 @@ const BookingForm = () => {
     );
   }
 
+  // Simple form layout for demo page
+  if (variant === 'simple') {
+    return (
+      <div className={className}>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Information */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+              <input
+                type="text"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Your first name"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Your last name"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="your@email.com"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Phone *</label>
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="(555) 123-4567"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Address Information */}
+          <div className="grid md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+              <input
+                type="text"
+                name="address"
+                value={formData.address || ''}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="123 Main Street"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+              <input
+                type="text"
+                name="city"
+                value={formData.city || ''}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Your City"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Zip Code</label>
+              <input
+                type="text"
+                name="zipCode"
+                value={formData.zipCode || ''}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="12345"
+              />
+            </div>
+          </div>
+
+          {/* Service Details */}
+          <div className="grid md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Service Type *</label>
+              <select
+                name="serviceType"
+                value={formData.serviceType}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              >
+                <option value="general">General Notary ($15 per signature)</option>
+                <option value="loan_signing">Loan Documents ($100-$250)</option>
+                <option value="estate_planning">Estate Planning ($120-$400)</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Number of Documents *</label>
+              <input
+                type="number"
+                name="documentCount"
+                value={formData.documentCount || 1}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                min="1"
+                max="50"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Number of Witnesses</label>
+              <input
+                type="number"
+                name="witnesses"
+                value={formData.witnesses || 0}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                min="0"
+                max="5"
+              />
+            </div>
+          </div>
+
+          {/* Appointment Timing */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Date *</label>
+              <input
+                type="date"
+                name="preferredDate"
+                value={formData.preferredDate}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                min={new Date().toISOString().split('T')[0]}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Time *</label>
+              <select
+                name="preferredTime"
+                value={formData.preferredTime}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              >
+                <option value="">Select a time slot</option>
+                <option value="09:00">9:00 AM - 10:00 AM</option>
+                <option value="10:00">10:00 AM - 11:00 AM</option>
+                <option value="11:00">11:00 AM - 12:00 PM</option>
+                <option value="13:00">1:00 PM - 2:00 PM</option>
+                <option value="14:00">2:00 PM - 3:00 PM</option>
+                <option value="15:00">3:00 PM - 4:00 PM</option>
+                <option value="16:00">4:00 PM - 5:00 PM</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Special Instructions */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Special Instructions</label>
+            <textarea
+              name="specialInstructions"
+              value={formData.specialInstructions || ''}
+              onChange={handleInputChange}
+              rows={3}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Any special requirements or notes for the notary..."
+            />
+          </div>
+
+          {/* Urgent Appointment Option */}
+          <div className="flex items-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <input
+              id="urgentAppointment"
+              name="urgentAppointment"
+              type="checkbox"
+              checked={formData.urgentAppointment || false}
+              onChange={handleInputChange}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="urgentAppointment" className="ml-3 block text-sm text-gray-900">
+              This is an urgent appointment (session within 24 hours)
+            </label>
+          </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex">
+                <svg className="h-5 w-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
+            <div>
+              <span className="text-lg font-semibold text-gray-900">Total: ${calculatePrice()}</span>
+              <p className="text-sm text-gray-600">
+                {formData.serviceType === 'general' && `$${15 * (formData.documentCount || 1)} + $10 fee`}
+                {formData.serviceType === 'loan_signing' && 'Loan signing package'}
+                {formData.serviceType === 'estate_planning' && 'Estate planning package'}
+              </p>
+            </div>
+            <button 
+              type="submit" 
+              disabled={loading}
+              className={`px-8 py-3 rounded-lg font-semibold transition-all ${
+                loading 
+                  ? 'bg-gray-400 cursor-not-allowed text-white' 
+                  : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl'
+              }`}
+            >
+              {loading ? 'Booking...' : `Book Now - $${calculatePrice()}`}
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
+  // Full form layout for main application
   return (
     <section id="booking" className="py-20 bg-gradient-to-br from-blue-50 to-indigo-50">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              Book Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Notary Session</span>
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Schedule your online notarization session in just a few minutes. Our certified notaries are available 24/7.
-            </p>
-          </div>
+          {showHeader && (
+            <div className="text-center mb-12">
+              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+                Book Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Notary Session</span>
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Schedule your notarization session in just a few minutes. Our certified notaries are available 24/7.
+              </p>
+            </div>
+          )}
 
-          <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
+          <div className={`grid ${showSidebar ? 'lg:grid-cols-3' : 'lg:grid-cols-1'} gap-8`}>
+            <div className={showSidebar ? "lg:col-span-2" : ""}>
               <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-xl p-8 space-y-8">
                 <div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
@@ -582,14 +838,14 @@ const BookingForm = () => {
                     <div className="flex-shrink-0 w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold mr-4">2</div>
                     <div>
                       <span className="font-medium text-gray-900">Get Confirmation</span>
-                      <p className="text-sm text-gray-500 mt-1">Receive a confirmation email with your virtual session link.</p>
+                      <p className="text-sm text-gray-500 mt-1">Receive a confirmation email.</p>
                     </div>
                   </li>
                   <li className="flex items-start">
                     <div className="flex-shrink-0 w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-bold mr-4">3</div>
                     <div>
-                      <span className="font-medium text-gray-900">Meet Online</span>
-                      <p className="text-sm text-gray-500 mt-1">Meet the notary online to get your documents signed!</p>
+                      <span className="font-medium text-gray-900">Meet Your Notary</span>
+                      <p className="text-sm text-gray-500 mt-1">Meet the notary to get your documents signed!</p>
                     </div>
                   </li>
                 </ul>

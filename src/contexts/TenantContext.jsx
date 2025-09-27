@@ -43,6 +43,7 @@ export const TenantProvider = ({ children }) => {
       }
       setSubdomain(null);
       setTenant(null);
+      setIsLoading(false);
       return;
     }
 
@@ -72,6 +73,7 @@ export const TenantProvider = ({ children }) => {
     } catch (err) {
       setError('Failed to load tenant information');
       console.error('Error loading tenant:', err);
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
@@ -133,7 +135,9 @@ export const TenantProvider = ({ children }) => {
     if (extractedSubdomain) {
       loadTenant(extractedSubdomain);
     } else {
+      // Main domain - no tenant context needed
       setIsMainDomain(true);
+      setIsLoading(false);
     }
   }, []);
 
