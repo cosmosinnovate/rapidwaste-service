@@ -1,4 +1,4 @@
-# 🚛 RapidWaste - Emergency Waste Pickup Service
+# 🚛 notary_now - Emergency Waste Pickup Service
 
 A full-stack web application for emergency waste pickup services with real-time booking, driver management, and payment processing.
 
@@ -23,7 +23,7 @@ cd backend && npm install
 # Set up environment variables
 cp backend/.env.example backend/.env
 # Edit backend/.env with your configuration:
-# - MongoDB connection string (default: mongodb://localhost:27017/rapidwaste)
+# - MongoDB connection string (default: mongodb://localhost:27017/notary_now)
 # - JWT secrets (generate secure random strings)
 # - Stripe keys (get from Stripe dashboard for payments)
 
@@ -40,11 +40,11 @@ cd backend && npm run seed
 ## 🔑 Test Login Credentials
 
 ### Admin Dashboard
-- **Email:** admin@rapidwaste.com
+- **Email:** admin@notary_now.com
 - **Password:** admin123
 
 ### Driver Dashboard  
-- **Email:** driver@rapidwaste.com
+- **Email:** driver@notary_now.com
 - **Password:** password123
 
 ## 🌟 Features
@@ -113,7 +113,7 @@ project-template-service/
 ```env
 NODE_ENV=development
 PORT=3001
-MONGODB_URI=mongodb://localhost:27017/rapidwaste
+MONGODB_URI=mongodb://localhost:27017/notary_now
 JWT_SECRET=your-secret-key
 STRIPE_SECRET_KEY=sk_test_your_stripe_key
 FRONTEND_URL=http://localhost:5173

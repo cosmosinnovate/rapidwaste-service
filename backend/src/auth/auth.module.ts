@@ -13,7 +13,7 @@ import { RolesGuard } from './roles.guard';
     UsersModule,
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'rapidwaste-secret-key',
+      secret: process.env.JWT_SECRET || 'notary_now-secret-key',
       signOptions: { expiresIn: '24h' },
     }),
   ],

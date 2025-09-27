@@ -110,7 +110,7 @@ Frontend Dashboard ← API Service ← Backend Response ← Database Query
 ## 🗄️ **Database Structure**
 
 ### **Sample Data Created**
-- **Driver**: `driver@rapidwaste.com` / `password123`
+- **Driver**: `driver@notary_now.com` / `password123`
 - **Bookings**: 4 sample bookings with different service types
 - **Customers**: Auto-created from booking submissions
 

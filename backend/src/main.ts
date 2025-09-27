@@ -54,7 +54,7 @@ async function bootstrap() {
       tagsSorter: 'alpha',
       operationsSorter: 'alpha',
     },
-    customSiteTitle: 'RapidWaste API Documentation',
+    customSiteTitle: 'notary_now API Documentation',
     customfavIcon: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9Im5vbmUiIHZpZXdCb3g9IjAgMCAyNCAyNCIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBjbGFzcz0idzYgaDYiPjxwYXRoIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZD0iTTE5IDdsLS44NjcgMTIuMTQyQTIgMiAwIDAgMSAxNi4xMzggMjFINy44NjJhMiAyIDAgMCAxLTEuOTk1LTEuODU4TDUgN201IDR2Nm00LTZ2Nm0xLTEwVjRhMSAxIDAgMCAwLTEtMWgtNGExIDEgMCAwIDAtMSAxdjNNNCA3aDE2IiAvPjwvc3ZnPg==',
   });
   

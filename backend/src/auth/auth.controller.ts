@@ -47,7 +47,7 @@ export class AuthController {
         refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
         user: {
           id: '507f1f77bcf86cd799439011',
-          email: 'driver@rapidwaste.com',
+          email: 'driver@notary_now.com',
           firstName: 'John',
           lastName: 'Driver',
           role: 'driver',
@@ -186,7 +186,7 @@ export class AuthController {
         refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
         user: {
           id: '507f1f77bcf86cd799439011',
-          email: 'driver@rapidwaste.com',
+          email: 'driver@notary_now.com',
           firstName: 'John',
           lastName: 'Driver',
           role: 'driver',

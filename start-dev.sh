@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Starting RapidWaste Development Environment..."
+echo "🚀 Starting notary_now Development Environment..."
 
 # Start MongoDB if not running
 echo "📦 Checking MongoDB..."
@@ -43,7 +43,7 @@ echo ""
 echo "📋 Services:"
 echo "  🖥️  Frontend: http://localhost:5173"
 echo "  🔗 Backend API: http://localhost:3001/api"
-echo "  🗄️  MongoDB: mongodb://localhost:27017/rapidwaste"
+echo "  🗄️  MongoDB: mongodb://localhost:27017/notary_now"
 echo ""
 echo "📖 Instructions:"
 echo "  1. Wait for both services to start"

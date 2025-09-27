@@ -69,8 +69,8 @@ class ApiService {
       this.setRefreshToken(refresh_token);
 
       // Update localStorage
-      localStorage.setItem('rapidwaste_token', access_token);
-      localStorage.setItem('rapidwaste_refresh_token', refresh_token);
+      localStorage.setItem('notary_now_token', access_token);
+      localStorage.setItem('notary_now_refresh_token', refresh_token);
 
       // Process the queue with the new token
       this.processQueue(null, access_token);
@@ -79,9 +79,9 @@ class ApiService {
     } catch (error) {
       // Refresh failed, clear tokens and process queue with error
       this.clearAuthToken();
-      localStorage.removeItem('rapidwaste_token');
-      localStorage.removeItem('rapidwaste_refresh_token');
-      localStorage.removeItem('rapidwaste_user');
+      localStorage.removeItem('notary_now_token');
+      localStorage.removeItem('notary_now_refresh_token');
+      localStorage.removeItem('notary_now_user');
       
       this.processQueue(error, null);
       

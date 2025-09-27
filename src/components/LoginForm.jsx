@@ -240,9 +240,9 @@ const LoginForm = ({ onSuccess, onCancel, defaultRole = 'customer' }) => {
         <div className="mt-6 p-4 bg-gray-50 rounded-md">
           <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Accounts:</h3>
           <div className="text-xs text-gray-600 space-y-1">
-            <div><strong>Driver:</strong> driver@rapidwaste.com / password123</div>
+            <div><strong>Driver:</strong> driver@notary_now.com / password123</div>
             <div><strong>Customer:</strong> customer@example.com / password123</div>
-            <div><strong>Admin:</strong> admin@rapidwaste.com / password123</div>
+            <div><strong>Admin:</strong> admin@notary_now.com / password123</div>
           </div>
         </div>
       </div>
