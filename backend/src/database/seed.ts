@@ -64,6 +64,25 @@ async function seed() {
       console.log('✅ Admin created:', admin.email);
     }
 
+    // Check if super admin user already exists
+    const existingSuperAdmin = await usersService.findByEmail('superadmin@notarynow.com');
+
+    if (existingSuperAdmin) {
+      console.log('ℹ️  Super admin already exists, skipping creation...');
+    } else {
+      // Create super admin user (use secure credentials in production)
+      const superAdmin = await usersService.create({
+        firstName: 'Super',
+        lastName: 'Admin',
+        email: 'superadmin@notarynow.com',
+        phone: '(555) 000-0000',
+        password: 'superadmin123',
+        role: 'super_admin',
+      });
+
+      console.log('✅ Super admin created:', superAdmin.email);
+    }
+
     // Check if sample bookings already exist
     const existingBookings = await bookingsService.findAll();
     

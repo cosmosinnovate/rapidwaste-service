@@ -47,11 +47,10 @@ export class AuthController {
         refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
         user: {
           id: '507f1f77bcf86cd799439011',
-          email: 'driver@notary_now.com',
+          email: 'notary@notarynow.com',
           firstName: 'John',
-          lastName: 'Driver',
-          role: 'driver',
-          driverId: 'D0001',
+          lastName: 'Notary',
+          role: 'notary',
         },
       },
     },
@@ -66,7 +65,6 @@ export class AuthController {
   })
   async login(@Body() loginDto: LoginDto) {
     const result = await this.authService.login(loginDto);
-    
     return {
       success: true,
       message: 'Login successful',
@@ -147,7 +145,6 @@ export class AuthController {
   })
   async register(@Body() registerDto: RegisterDto) {
     const result = await this.authService.register(registerDto);
-    
     return {
       success: true,
       message: 'Registration successful',
@@ -186,11 +183,10 @@ export class AuthController {
         refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
         user: {
           id: '507f1f77bcf86cd799439011',
-          email: 'driver@notary_now.com',
-          firstName: 'John',
-          lastName: 'Driver',
-          role: 'driver',
-          driverId: 'D0001',
+          email: 'notary@notarynow.com',
+          firstName: 'Sarah',
+          lastName: 'Notary',
+          role: 'notary',
         },
       },
     },
@@ -205,11 +201,11 @@ export class AuthController {
   })
   async refresh(@Body() body: { refresh_token: string }) {
     const result = await this.authService.refreshToken(body.refresh_token);
-    
     return {
       success: true,
       message: 'Token refreshed successfully',
       data: result,
     };
   }
-} 
+}
+ 

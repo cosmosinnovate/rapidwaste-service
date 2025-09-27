@@ -4,7 +4,7 @@ import { TenantService } from './tenants.service';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { CreateTenantDto, UpdateTenantDto } from 'src/common/dto/create-tenant.dto';
+import { CreateTenantDto, UpdateTenantDto } from '../common/dto/create-tenant.dto';
 
 @ApiTags('tenants')
 @Controller('tenants')

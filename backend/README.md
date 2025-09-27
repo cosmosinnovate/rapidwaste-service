@@ -86,20 +86,14 @@ NODE_ENV=development
 PORT=3001
 MONGODB_URI=mongodb://localhost:27017/notary_now
 JWT_SECRET=your-secret-key
-FRONTEND_URL=http://localhost:5173
-```
-
 ## 📊 Sample Data
 
 The seed script creates:
 - 1 sample admin (admin@notary_now.com / admin123)
-- 1 sample driver (driver@notary_now.com / password123)
 - 10 sample bookings with different service types
 - Test customers for booking relationships
 
 ## 🚀 Deployment
-
-```bash
 # Build for production
 npm run build
 
