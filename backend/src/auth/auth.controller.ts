@@ -95,14 +95,14 @@ export class AuthController {
       },
       notaryRegistration: {
         summary: 'Notary Registration',
-        description: 'Example registration for a new notary',
+        description: 'Example registration for a new business owner (mapped to notary/admin on backend)',
         value: {
           firstName: 'Sarah',
           lastName: 'Notary',
           email: 'sarah.notary@notarynow.com',
           phone: '(555) 987-6543',
           password: 'notaryPass456',
-          role: 'notary',
+          role: 'Business Owner',
         },
       },
     },

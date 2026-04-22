@@ -34,24 +34,16 @@ mongod
 cd backend && npm run seed
 
 # Start the development servers
-./start-dev.sh
-```
-
 ## 🔑 Test Login Credentials
 
 ### Admin Dashboard
 - **Email:** admin@notary_now.com
 - **Password:** admin123
 
-### Driver Dashboard  
-- **Email:** driver@notary_now.com
-- **Password:** password123
-
 ## 🌟 Features
 
 ### Customer Features
 - ✅ **Emergency Booking** - Same-day waste pickup
-- ✅ **Service Types** - Regular, Emergency, Bulk removal
 - ✅ **Real-time Pricing** - Dynamic cost calculation
 - ✅ **Payment Processing** - Secure Stripe integration
 - ✅ **Booking Tracking** - Status updates and notifications

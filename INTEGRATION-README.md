@@ -104,21 +104,16 @@ curl http://localhost:3001/api/bookings
 ```
 Frontend Form → API Service → Backend Controller → Service → MongoDB
                                      ↓
-Frontend Dashboard ← API Service ← Backend Response ← Database Query
-```
-
 ## 🗄️ **Database Structure**
 
 ### **Sample Data Created**
-- **Driver**: `driver@notary_now.com` / `password123`
-- **Bookings**: 4 sample bookings with different service types
-- **Customers**: Auto-created from booking submissions
+ - **Bookings**: 4 sample bookings with different service types
+ - **Customers**: Auto-created from booking submissions
 
 ### **Data Models**
 - **Users** - Customers, drivers, and admins
 - **Bookings** - Complete appointment tracking
 - **Drivers** - Driver-specific data and metrics
-
 ## 🔧 **Configuration**
 
 ### **Environment Setup**

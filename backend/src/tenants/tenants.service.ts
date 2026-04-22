@@ -140,7 +140,7 @@ export class TenantService {
     // You can add more complex statistics here
     // For now, returning basic tenant info
     return {
-      id: tenant._id,
+      id: (tenant as any).id,
       subdomain: tenant.subdomain,
       name: tenant.name,
       isActive: tenant.isActive,

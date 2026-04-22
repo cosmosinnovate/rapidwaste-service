@@ -28,7 +28,7 @@ export class TenantMiddleware implements NestMiddleware {
 
         // Inject tenant context into request
         req['tenant'] = tenant;
-        req['tenantId'] = tenant._id;
+        req['tenantId'] = (tenant as any).id;
         req['subdomain'] = subdomain;
       } catch (error) {
         if (error instanceof NotFoundException) {

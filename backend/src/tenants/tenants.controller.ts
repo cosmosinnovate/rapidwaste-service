@@ -14,7 +14,7 @@ export class TenantsController {
   constructor(private readonly tenantsService: TenantService) {}
 
   @Post()
-  @Roles('super_admin')
+  @Roles('super_admin', 'admin')
   @ApiOperation({ summary: 'Create a new tenant' })
   @ApiResponse({ status: 201, description: 'Tenant created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
@@ -68,7 +68,7 @@ export class TenantsController {
   }
 
   @Delete(':id')
-  @Roles('super_admin')
+  @Roles('super_admin', 'admin')
   @ApiOperation({ summary: 'Delete tenant' })
   @ApiResponse({ status: 200, description: 'Tenant deleted successfully' })
   @ApiResponse({ status: 404, description: 'Tenant not found' })

@@ -123,7 +123,7 @@ const LoginForm = ({ onSuccess, onCancel, defaultRole = 'customer' }) => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Role *
+                  Role / Title *
                 </label>
                 <select
                   name="role"
@@ -132,8 +132,17 @@ const LoginForm = ({ onSuccess, onCancel, defaultRole = 'customer' }) => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="customer">Customer</option>
-                  <option value="driver">Driver</option>
-                  <option value="admin">Admin</option>
+                  <option value="Business Owner">Business Owner</option>
+                  <option value="CEO">CEO</option>
+                  <option value="Owner">Owner</option>
+                  <option value="Founder">Founder</option>
+                  <option value="Operations Manager">Operations Manager</option>
+                  <option value="Office Manager">Office Manager</option>
+                  <option value="Manager">Manager</option>
+                  <option value="Executive">Executive</option>
+                  <option value="Director">Director</option>
+                  <option value="Partner">Partner</option>
+                  <option value="Principal">Principal</option>
                 </select>
               </div>
 
@@ -240,9 +249,8 @@ const LoginForm = ({ onSuccess, onCancel, defaultRole = 'customer' }) => {
         <div className="mt-6 p-4 bg-gray-50 rounded-md">
           <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Accounts:</h3>
           <div className="text-xs text-gray-600 space-y-1">
-            <div><strong>Driver:</strong> driver@notary_now.com / password123</div>
             <div><strong>Customer:</strong> customer@example.com / password123</div>
-            <div><strong>Admin:</strong> admin@notary_now.com / password123</div>
+            <div><strong>Admin:</strong> admin@notarynow.com / password123</div>
           </div>
         </div>
       </div>

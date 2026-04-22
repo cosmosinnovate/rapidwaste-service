@@ -64,12 +64,53 @@ export class RegisterDto {
   password: string;
 
   @ApiProperty({
-    description: 'User role in the system',
-    enum: ['customer', 'notary'],
-    example: 'customer',
+    description: 'User role selection. Business-friendly titles will be normalized on the backend to the appropriate system role.',
+    enum: [
+      'customer',
+      'notary',
+      'CEO',
+      'Business Owner',
+      'Owner',
+      'Founder',
+      'Operations Manager',
+      'Office Manager',
+      'Manager',
+      'Executive',
+      'Director',
+      'Partner',
+      'Principal',
+    ],
+    example: 'Business Owner',
   })
-  @IsEnum(['customer', 'notary'])
-  role: 'customer' | 'notary';
+  @IsEnum([
+    'customer',
+    'notary',
+    'CEO',
+    'Business Owner',
+    'Owner',
+    'Founder',
+    'Operations Manager',
+    'Office Manager',
+    'Manager',
+    'Executive',
+    'Director',
+    'Partner',
+    'Principal',
+  ])
+  role:
+    | 'customer'
+    | 'notary'
+    | 'CEO'
+    | 'Business Owner'
+    | 'Owner'
+    | 'Founder'
+    | 'Operations Manager'
+    | 'Office Manager'
+    | 'Manager'
+    | 'Executive'
+    | 'Director'
+    | 'Partner'
+    | 'Principal';
 
   @ApiPropertyOptional({
     description: 'User street address',

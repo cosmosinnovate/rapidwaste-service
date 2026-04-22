@@ -5,9 +5,6 @@ export type TenantDocument = Tenant & Document;
 
 @Schema({ timestamps: true })
 export class Tenant {
-  @Prop({ type: Types.ObjectId })
-  _id: Types.ObjectId;
-
   @Prop({ required: true, unique: true })
   subdomain: string;
 
