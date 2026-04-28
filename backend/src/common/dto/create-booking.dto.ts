@@ -3,6 +3,13 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateBookingDto {
   @ApiProperty({
+    description: 'Tenant ID',
+    example: '60d0fe4f5311236168a109ca',
+  })
+  @IsString()
+  tenantId: string;
+
+  @ApiProperty({
     description: 'Customer first name',
     example: 'John',
     minLength: 2,

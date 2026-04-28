@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { User, UserDocument } from '../database/schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 
@@ -11,7 +11,29 @@ export class UsersService {
   ) {}
 
   async findByEmail(email: string): Promise<UserDocument | undefined> {
-    return this.userModel.findOne({ email }).exec();
+    return this.userModel.findOne({ email: new RegExp(`^${email}$`, 'i') }).exec();
+  }
+
+  async findByEmailAndTenant(email: string, tenantId: string): Promise<UserDocument | undefined> {
+    // Try to find by tenant ID or tenant Slug
+    const emailRegex = new RegExp(`^${email}$`, 'i');
+    
+    const user = await this.userModel.findOne({ 
+      email: emailRegex, 
+      $or: [
+        { tenantId: Types.ObjectId.isValid(tenantId) ? new Types.ObjectId(tenantId) : null },
+      ]
+    }).exec();
+    
+    if (user) return user;
+
+    // Fallback: Check if the tenantId passed is a slug
+    const tenant = await this.userModel.db.model('Tenant').findOne({ slug: tenantId });
+    if (tenant) {
+      return this.userModel.findOne({ email: emailRegex, tenantId: tenant._id }).exec();
+    }
+
+    return undefined;
   }
 
   async findById(id: string): Promise<UserDocument> {

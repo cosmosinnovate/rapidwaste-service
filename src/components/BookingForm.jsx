@@ -38,27 +38,26 @@ const BookingForm = () => {
   // Pricing calculator
   const calculatePrice = () => {
     const basePrices = {
-      regular: 45,
-      emergency: 50,
-      bulk: 79
+      regular: 800,
+      emergency: 1200,
+      bulk: 450
     };
 
     const bagPricing = {
       '1-5': 0,
-      '6-10': 5,
-      '11+': 10
+      '6-10': 50,
+      '11+': 100
     };
 
     // Emergency time slot pricing
     const emergencyTimeFees = {
-      'Next 2 hours': 10,
-      'Next 4 hours': 5,
+      'Next 2 hours': 100,
+      'Next 4 hours': 50,
       'Today by 6 PM': 0
     };
-
     const basePrice = basePrices[formData.serviceType];
     const bagSurcharge = bagPricing[formData.bagCount];
-    const urgentFee = formData.urgentPickup ? 15 : 0;
+    const urgentFee = formData.urgentPickup ? 150 : 0;
     
     // Add emergency time slot fee if applicable
     const emergencyTimeFee = formData.serviceType === 'emergency' && formData.preferredTime 
@@ -177,7 +176,7 @@ const BookingForm = () => {
                   <ul className="text-sm text-emergency-700 space-y-1 text-left">
                     <li>• SMS confirmation sent to {formData.phone}</li>
                     <li>• Driver will call 30 minutes before arrival</li>
-                    <li>• Place bags at designated pickup location</li>
+                    <li>• Place items at designated pickup location</li>
                     <li>• Payment due on service completion</li>
                   </ul>
                 </div>
@@ -296,9 +295,9 @@ const BookingForm = () => {
                       className="input-field"
                       required
                     >
-                      <option value="emergency">Emergency Same-Day ($50 base)</option>
-                      <option value="regular">Regular Pickup ($45 base)</option>
-                      <option value="bulk">Bulk Item Removal ($79 base)</option>
+                      <option value="emergency">Priority Same-Day ($1,200 base)</option>
+                      <option value="regular">Standard Relocation ($800 base)</option>
+                      <option value="bulk">Heavy Furniture & Bulk ($450 base)</option>
                     </select>
 
                     <select
@@ -307,9 +306,9 @@ const BookingForm = () => {
                       onChange={handleInputChange}
                       className="input-field"
                     >
-                      <option value="1-5">1-5 bags (Base rate)</option>
-                      <option value="6-10">6-10 bags (+$5)</option>
-                      <option value="11+">11+ bags (+$10)</option>
+                      <option value="1-5">1-5 items (Base rate)</option>
+                      <option value="6-10">6-10 items (+$50)</option>
+                      <option value="11+">11+ items (+$100)</option>
                     </select>
 
                     {/* Pickup Date and Time */}
@@ -348,8 +347,8 @@ const BookingForm = () => {
                           {formData.serviceType === 'emergency' ? (
                             // Emergency time slots (same day)
                             <>
-                              <option value="Next 2 hours">Next 2 hours (+$10)</option>
-                              <option value="Next 4 hours">Next 4 hours (+$5)</option>
+                              <option value="Next 2 hours">Next 2 hours (+$100)</option>
+                              <option value="Next 4 hours">Next 4 hours (+$50)</option>
                               <option value="Today by 6 PM">Today by 6 PM (standard)</option>
                             </>
                           ) : (
@@ -419,15 +418,15 @@ const BookingForm = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Base Service</span>
                     <span className="font-semibold">
-                      ${formData.serviceType === 'emergency' ? '50' : 
-                        formData.serviceType === 'bulk' ? '79' : '45'}
+                      ${formData.serviceType === 'emergency' ? '1,200' : 
+                        formData.serviceType === 'bulk' ? '450' : '800'}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Bag Count ({formData.bagCount})</span>
+                    <span className="text-gray-600">Inventory Volume ({formData.bagCount})</span>
                     <span className="font-semibold">
-                      +${formData.bagCount === '6-10' ? '5' : 
-                          formData.bagCount === '11+' ? '10' : '0'}
+                      +${formData.bagCount === '6-10' ? '50' : 
+                          formData.bagCount === '11+' ? '100' : '0'}
                     </span>
                   </div>
                   <div className="border-t border-gray-200 pt-3">

@@ -1,4 +1,4 @@
-# RapidWaste Backend Quick Start
+# Rapid Move & Clear Backend Quick Start
 
 ## Features
 - NestJS TypeScript backend with MongoDB
@@ -23,7 +23,7 @@ npm install
 ### Environment Variables
 Create a `.env` file:
 ```
-MONGODB_URI=mongodb://localhost:27017/rapidwaste
+MONGODB_URI=mongodb://localhost:27017/rapidmoveclear
 JWT_SECRET=your-super-secret-jwt-key-here
 NODE_ENV=development
 PORT=3001

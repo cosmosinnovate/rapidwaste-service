@@ -1,6 +1,6 @@
-# 🚛 RapidWaste - Emergency Waste Pickup Service
+# 🚛 Rapid Move & Clear - Specialists in Moving and Waste Clearing
 
-A full-stack web application for emergency waste pickup services with real-time booking, driver management, and payment processing.
+A full-stack web application for professional moving and waste clearing services with real-time booking, driver management, and payment processing.
 
 ## 🚀 Quick Start
 
@@ -14,7 +14,7 @@ A full-stack web application for emergency waste pickup services with real-time 
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd rapidwaste-service
+cd rapidmove-service
 
 # Install dependencies
 npm install
@@ -23,7 +23,7 @@ cd backend && npm install
 # Set up environment variables
 cp backend/.env.example backend/.env
 # Edit backend/.env with your configuration:
-# - MongoDB connection string (default: mongodb://localhost:27017/rapidwaste)
+# - MongoDB connection string (default: mongodb://localhost:27017/rapidmoveclear)
 # - JWT secrets (generate secure random strings)
 # - Stripe keys (get from Stripe dashboard for payments)
 
@@ -40,18 +40,19 @@ cd backend && npm run seed
 ## 🔑 Test Login Credentials
 
 ### Admin Dashboard
-- **Email:** admin@rapidwaste.com
+- **Email:** admin@rapidmoveclear.com
 - **Password:** admin123
 
 ### Driver Dashboard  
-- **Email:** driver@rapidwaste.com
+- **Email:** driver@rapidmoveclear.com
 - **Password:** password123
 
 ## 🌟 Features
 
 ### Customer Features
-- ✅ **Emergency Booking** - Same-day waste pickup
-- ✅ **Service Types** - Regular, Emergency, Bulk removal
+- ✅ **Professional Moving** - Residential and commercial moves
+- ✅ **Waste Clearing** - Same-day waste removal
+- ✅ **Service Types** - Moving, Waste, Bulk removal
 - ✅ **Real-time Pricing** - Dynamic cost calculation
 - ✅ **Payment Processing** - Secure Stripe integration
 - ✅ **Booking Tracking** - Status updates and notifications
@@ -91,7 +92,7 @@ cd backend && npm run seed
 ## 📱 Application Structure
 
 ```
-rapidwaste-service/
+rapidmove-service/
 ├── src/                    # Frontend React app
 │   ├── components/        # React components
 │   ├── contexts/          # React contexts
@@ -113,7 +114,7 @@ rapidwaste-service/
 ```env
 NODE_ENV=development
 PORT=3001
-MONGODB_URI=mongodb://localhost:27017/rapidwaste
+MONGODB_URI=mongodb://localhost:27017/rapidmoveclear
 JWT_SECRET=your-secret-key
 STRIPE_SECRET_KEY=sk_test_your_stripe_key
 FRONTEND_URL=http://localhost:5173

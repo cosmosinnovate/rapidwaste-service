@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTenant } from '../contexts/TenantContext';
 import ApiService from '../services/api';
 // import PaymentForm from './PaymentForm';
 
-const BookingFormWithPayment = () => {
+const BookingFormWithPayment = ({ initialData }) => {
+  const { tenant } = useTenant();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -16,8 +18,16 @@ const BookingFormWithPayment = () => {
     preferredDate: '',
     preferredTime: '',
     specialInstructions: '',
-    urgentPickup: false
+    urgentPickup: false,
+    ...initialData // Override with any pre-filled data
   });
+
+  // Update form if initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setFormData(prev => ({ ...prev, ...initialData }));
+    }
+  }, [initialData]);
 
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
@@ -38,29 +48,29 @@ const BookingFormWithPayment = () => {
     }
   }, [formData.serviceType]);
 
-  // Pricing calculator
+  // Pricing calculator (Dynamic based on Tenant Settings)
   const calculatePrice = () => {
     const basePrices = {
-      regular: 45,
-      emergency: 50,
-      bulk: 79
+      regular: tenant?.settings?.basePriceRegular || 800,
+      emergency: tenant?.settings?.basePriceEmergency || 1200,
+      bulk: tenant?.settings?.basePriceBulk || 450
     };
 
     const bagPricing = {
       '1-5': 0,
-      '6-10': 5,
-      '11+': 10
+      '6-10': 50,
+      '11+': 100
     };
 
     const emergencyTimeFees = {
-      'Next 2 hours': 10,
-      'Next 4 hours': 5,
+      'Next 2 hours': 100,
+      'Next 4 hours': 50,
       'Today by 6 PM': 0
     };
-
+    
     const basePrice = basePrices[formData.serviceType];
     const bagSurcharge = bagPricing[formData.bagCount];
-    const urgentFee = formData.urgentPickup ? 15 : 0;
+    const urgentFee = formData.urgentPickup ? 150 : 0;
     
     const emergencyTimeFee = formData.serviceType === 'emergency' && formData.preferredTime 
       ? (emergencyTimeFees[formData.preferredTime] || 0) 
@@ -155,7 +165,7 @@ const BookingFormWithPayment = () => {
                     <span className="font-semibold capitalize">{formData.serviceType}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Bag Count:</span>
+                    <span>Item Count:</span>
                     <span className="font-semibold">{formData.bagCount}</span>
                   </div>
                   <div className="flex justify-between">
@@ -169,7 +179,6 @@ const BookingFormWithPayment = () => {
                 </div>
               </div>
 
-              {/* Temporarily disabled PaymentForm */}
               <div className="max-w-md mx-auto">
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
@@ -265,20 +274,20 @@ const BookingFormWithPayment = () => {
               </div>
 
               <div className="space-y-4">
-                <div className="bg-emergency-50 border border-emergency-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-emergency-800 mb-2">Next Steps</h4>
-                  <ul className="text-sm text-emergency-700 space-y-1 text-left">
+                <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 text-left">
+                  <h4 className="font-semibold text-primary-800 mb-2">Next Steps</h4>
+                  <ul className="text-sm text-primary-700 space-y-1">
                     <li>• SMS confirmation sent to {formData.phone}</li>
-                    <li>• Driver will call 30 minutes before arrival</li>
-                    <li>• Place bags at designated pickup location</li>
+                    <li>• Specialist will call 30 minutes before arrival</li>
+                    <li>• Place items at designated pickup location</li>
                     {!paymentSuccess && <li>• Payment due on service completion</li>}
                   </ul>
                 </div>
 
                 <div className="text-center">
                   <p className="text-gray-600 mb-4">Need immediate assistance?</p>
-                  <a href="tel:+1-800-RAPID-WASTE" className="btn-emergency inline-block">
-                    Call Emergency Hotline
+                  <a href={`tel:${tenant?.phone}`} className="bg-primary-600 text-white px-6 py-2 rounded-lg font-semibold inline-block">
+                    Call Priority Concierge
                   </a>
                 </div>
               </div>
@@ -295,10 +304,10 @@ const BookingFormWithPayment = () => {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Book Your <span className="text-gradient">Pickup Service</span>
+              Book Your <span className="text-gradient">Service</span>
             </h2>
             <p className="text-lg text-gray-600">
-              Secure online booking with instant payment processing
+              Secure online booking for {tenant?.name || 'Rapid Move & Clear'}
             </p>
           </div>
 
@@ -348,7 +357,7 @@ const BookingFormWithPayment = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Pickup Address</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Service Address</h3>
                   <div className="space-y-4">
                     <input
                       type="text"
@@ -392,9 +401,9 @@ const BookingFormWithPayment = () => {
                       className="input-field"
                       required
                     >
-                      <option value="emergency">Emergency Same-Day ($50 base)</option>
-                      <option value="regular">Regular Pickup ($45 base)</option>
-                      <option value="bulk">Bulk Item Removal ($79 base)</option>
+                      <option value="emergency">Priority Same-Day (${tenant?.settings?.basePriceEmergency || 1200} base)</option>
+                      <option value="regular">Standard Relocation (${tenant?.settings?.basePriceRegular || 800} base)</option>
+                      <option value="bulk">Heavy Furniture & Bulk (${tenant?.settings?.basePriceBulk || 450} base)</option>
                     </select>
 
                     <select
@@ -403,15 +412,15 @@ const BookingFormWithPayment = () => {
                       onChange={handleInputChange}
                       className="input-field"
                     >
-                      <option value="1-5">1-5 bags (Base rate)</option>
-                      <option value="6-10">6-10 bags (+$5)</option>
-                      <option value="11+">11+ bags (+$10)</option>
+                      <option value="1-5">1-5 items (Included)</option>
+                      <option value="6-10">6-10 items (+$50)</option>
+                      <option value="11+">11+ items (+$100)</option>
                     </select>
 
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {formData.serviceType === 'emergency' ? 'Pickup Date (Today)' : 'Preferred Pickup Date *'}
+                          {formData.serviceType === 'emergency' ? 'Service Date (Today)' : 'Preferred Date *'}
                         </label>
                         <input
                           type="date"
@@ -424,26 +433,22 @@ const BookingFormWithPayment = () => {
                           required={formData.serviceType !== 'emergency'}
                           disabled={formData.serviceType === 'emergency'}
                         />
-                        {formData.serviceType === 'emergency' && (
-                          <p className="text-sm text-orange-600 mt-1">Emergency pickups are scheduled for today</p>
-                        )}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {formData.serviceType === 'emergency' ? 'Preferred Time Slot *' : 'Preferred Time'}
+                          Preferred Arrival Window
                         </label>
                         <select
                           name="preferredTime"
                           value={formData.preferredTime}
                           onChange={handleInputChange}
                           className="input-field"
-                          required={formData.serviceType === 'emergency'}
                         >
-                          <option value="">{formData.serviceType === 'emergency' ? 'Select time slot' : 'Any time'}</option>
+                          <option value="">Select time slot</option>
                           {formData.serviceType === 'emergency' ? (
                             <>
-                              <option value="Next 2 hours">Next 2 hours (+$10)</option>
-                              <option value="Next 4 hours">Next 4 hours (+$5)</option>
+                              <option value="Next 2 hours">Urgent: Next 2 hours (+$100)</option>
+                              <option value="Next 4 hours">Priority: Next 4 hours (+$50)</option>
                               <option value="Today by 6 PM">Today by 6 PM (standard)</option>
                             </>
                           ) : (
@@ -465,86 +470,77 @@ const BookingFormWithPayment = () => {
                       onChange={handleInputChange}
                       rows={4}
                       className="input-field"
-                      placeholder="Special Instructions for Driver"
+                      placeholder="Special Instructions for Team"
                     />
                   </div>
                 </div>
 
                 {error && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                    <div className="flex items-center">
-                      <svg className="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                      <span className="text-red-700 text-sm">{error}</span>
-                    </div>
+                    <p className="text-red-700 text-sm">{error}</p>
                   </div>
                 )}
 
                 <button 
                   type="submit" 
                   disabled={loading}
-                  className={`w-full text-lg py-3 px-6 rounded-lg font-semibold transition-colors duration-200 ${
+                  className={`w-full text-lg py-4 px-6 rounded-xl font-bold transition-all duration-200 ${
                     loading 
                       ? 'bg-gray-400 cursor-not-allowed text-white' 
-                      : 'bg-emergency-600 hover:bg-emergency-700 text-white'
+                      : 'bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl'
                   }`}
                 >
-                  {loading ? (
-                    <div className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Creating Booking...
-                    </div>
-                  ) : (
-                    `Book Service - $${calculatePrice()}`
-                  )}
+                  {loading ? 'Processing...' : `Secure Priority Quote - $${calculatePrice()}`}
                 </button>
               </form>
             </div>
 
             <div className="space-y-6">
-              <div className="bg-white rounded-2xl shadow-lg p-6">
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Pricing Summary</h3>
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Base Service</span>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">Base Service ({formData.serviceType})</span>
                     <span className="font-semibold">
-                      ${formData.serviceType === 'emergency' ? '50' : 
-                        formData.serviceType === 'bulk' ? '79' : '45'}
+                      ${formData.serviceType === 'emergency' ? (tenant?.settings?.basePriceEmergency || 1200) : 
+                        formData.serviceType === 'bulk' ? (tenant?.settings?.basePriceBulk || 450) : (tenant?.settings?.basePriceRegular || 800)}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Bag Count ({formData.bagCount})</span>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">Inventory Volume ({formData.bagCount})</span>
                     <span className="font-semibold">
-                      +${formData.bagCount === '6-10' ? '5' : 
-                          formData.bagCount === '11+' ? '10' : '0'}
+                      +${formData.bagCount === '6-10' ? '50' : 
+                          formData.bagCount === '11+' ? '100' : '0'}
                     </span>
                   </div>
                   {formData.serviceType === 'emergency' && formData.preferredTime && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Time Slot Fee</span>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600">Priority Arrival Window</span>
                       <span className="font-semibold">
-                        +${formData.preferredTime === 'Next 2 hours' ? '10' : 
-                            formData.preferredTime === 'Next 4 hours' ? '5' : '0'}
+                        +${formData.preferredTime === 'Next 2 hours' ? '100' : 
+                            formData.preferredTime === 'Next 4 hours' ? '50' : '0'}
                       </span>
                     </div>
                   )}
-                  <div className="border-t border-gray-200 pt-3">
+                  <div className="border-t border-gray-200 pt-3 mt-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-lg font-bold text-gray-900">Total</span>
+                      <span className="text-lg font-bold text-gray-900">Total Quote</span>
                       <span className="text-2xl font-bold text-primary-600">${calculatePrice()}</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-semibold text-blue-900 mb-2">Secure Payment</h4>
-                <p className="text-sm text-blue-700">
-                  Your payment is processed securely through Stripe. We accept all major credit cards.
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                <div className="flex items-center space-x-3 mb-3 text-blue-900">
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.954 0 0112 2.944a11.955 11.954 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  <h4 className="font-bold">Premium Guarantee</h4>
+                </div>
+                <p className="text-sm text-blue-700 leading-relaxed">
+                  Every move is fully insured and handled by our elite specialized teams. 
+                  {tenant?.settings?.requireDeposit ? ' A deposit is required to lock in your priority window.' : ' No immediate payment required for standard quotes.'}
                 </p>
               </div>
             </div>
@@ -555,4 +551,4 @@ const BookingFormWithPayment = () => {
   );
 };
 
-export default BookingFormWithPayment; 
+export default BookingFormWithPayment;

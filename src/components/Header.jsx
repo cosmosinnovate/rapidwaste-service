@@ -1,15 +1,17 @@
 import { useState } from 'react';
+import { useTenant } from '../contexts/TenantContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { tenant } = useTenant();
 
   return (
     <header className="bg-white shadow-lg sticky top-0 z-50">
-      {/* Emergency Banner */}
-      <div className="bg-emergency-600 text-white py-2">
+      {/* Premium Banner */}
+      <div className="bg-primary-900 text-white py-2">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm font-medium">
-            🚨 EMERGENCY HOTLINE: <a href="tel:+1-800-RAPID-WASTE" className="font-bold underline hover:text-emergency-200">(800) RAPID-WASTE</a> - Available 24/7
+            ✨ PRIORITY CONCIERGE: <a href={`tel:${tenant?.phone}`} className="font-bold underline hover:text-primary-200">{tenant?.phone || '(800) RAPID-MOVE'}</a> - {tenant?.name || 'Relocation & Clearing Specialists'}
           </p>
         </div>
       </div>
@@ -20,13 +22,17 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center space-x-3">
             <div className="bg-primary-600 p-3 rounded-lg">
-              <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
+              {tenant?.logo ? (
+                <img src={tenant.logo} alt={tenant.name} className="h-8 w-8 object-contain" />
+              ) : (
+                <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+              )}
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">RapidWaste</h1>
-              <p className="text-sm text-gray-600">Emergency Pickup Service</p>
+              <h1 className="text-2xl font-bold text-gray-900">{tenant?.name || 'Rapid Move & Clear'}</h1>
+              <p className="text-sm text-gray-600">Premium Relocation & Clearing</p>
             </div>
           </div>
 
@@ -36,8 +42,8 @@ const Header = () => {
             <a href="#services" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Services</a>
             <a href="#booking" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Book Now</a>
             <a href="#contact" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Contact</a>
-            <button className="btn-emergency">
-              Emergency Pickup
+            <button className="bg-primary-600 hover:opacity-90 text-primary-fg px-6 py-2 rounded-lg font-semibold transition-colors">
+              Priority Booking
             </button>
           </nav>
 
@@ -64,8 +70,8 @@ const Header = () => {
               <a href="#services" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Services</a>
               <a href="#booking" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Book Now</a>
               <a href="#contact" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Contact</a>
-              <button className="btn-emergency w-full">
-                Emergency Pickup
+              <button className="bg-primary-600 hover:bg-primary-700 text-white w-full py-3 rounded-lg font-semibold transition-colors">
+                Priority Booking
               </button>
             </nav>
           </div>

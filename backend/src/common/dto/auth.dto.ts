@@ -3,6 +3,13 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class LoginDto {
   @ApiProperty({
+    description: 'Tenant ID or Slug',
+    example: 'rapidmoveclear',
+  })
+  @IsString()
+  tenantId: string;
+
+  @ApiProperty({
     description: 'User email address',
     example: 'driver@rapidwaste.com',
     format: 'email',
@@ -21,6 +28,13 @@ export class LoginDto {
 }
 
 export class RegisterDto {
+  @ApiProperty({
+    description: 'Tenant ID',
+    example: '60d0fe4f5311236168a109ca',
+  })
+  @IsString()
+  tenantId: string;
+
   @ApiProperty({
     description: 'User first name',
     example: 'John',

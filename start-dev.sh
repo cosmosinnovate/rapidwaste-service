@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Starting RapidWaste Development Environment..."
+echo "🚀 Starting Rapid Move & Clear Development Environment..."
 
 # Start MongoDB if not running
 echo "📦 Checking MongoDB..."
@@ -43,7 +43,7 @@ echo ""
 echo "📋 Services:"
 echo "  🖥️  Frontend: http://localhost:5173"
 echo "  🔗 Backend API: http://localhost:3001/api"
-echo "  🗄️  MongoDB: mongodb://localhost:27017/rapidwaste"
+echo "  🗄️  MongoDB: mongodb://localhost:27017/rapidmoveclear"
 echo ""
 echo "📖 Instructions:"
 echo "  1. Wait for both services to start"
@@ -51,8 +51,8 @@ echo "  2. Open http://localhost:5173 in your browser"
 echo "  3. Click 'Admin Portal' to access drivers dashboard"
 echo "  4. Test booking creation on the main page"
 echo ""
-echo "🔑 Test Driver Login:"
-echo "  📧 Email: admin@rapidwaste.com"
+echo "🔑 Test Login:"
+echo "  📧 Email: admin@rapidmoveclear.com"
 echo "  🔒 Password: admin123"
 echo ""
 echo "⚠️  Note: Run 'npm run seed' in backend/ to create sample data"

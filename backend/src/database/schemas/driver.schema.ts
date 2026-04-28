@@ -5,6 +5,9 @@ export type DriverDocument = Driver & Document;
 
 @Schema({ timestamps: true })
 export class Driver {
+  @Prop({ type: Types.ObjectId, ref: 'Tenant', required: true })
+  tenantId: Types.ObjectId;
+
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId: Types.ObjectId;
 

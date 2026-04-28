@@ -1,10 +1,10 @@
-# RapidWaste Backend API
+# Rapid Move & Clear Backend API
 
-NestJS backend for the RapidWaste emergency waste pickup service.
+NestJS backend for the Rapid Move & Clear specialist moving and waste clearing service.
 
 ## 🚀 Features
 
-- **Booking Management** - Create, track, and manage waste pickup appointments
+- **Booking Management** - Create, track, and manage move and waste clearing appointments
 - **Driver Dashboard** - Real-time driver interface with booking updates
 - **Authentication** - JWT-based auth for customers and drivers
 - **Real-time Updates** - WebSocket support for live notifications
@@ -84,7 +84,7 @@ npm run start:dev
 ```env
 NODE_ENV=development
 PORT=3001
-MONGODB_URI=mongodb://localhost:27017/rapidwaste
+MONGODB_URI=mongodb://localhost:27017/rapidmoveclear
 JWT_SECRET=your-secret-key
 FRONTEND_URL=http://localhost:5173
 ```
@@ -92,8 +92,8 @@ FRONTEND_URL=http://localhost:5173
 ## 📊 Sample Data
 
 The seed script creates:
-- 1 sample admin (admin@rapidwaste.com / admin123)
-- 1 sample driver (driver@rapidwaste.com / password123)
+- 1 sample admin (admin@rapidmoveclear.com / admin123)
+- 1 sample driver (driver@rapidmoveclear.com / password123)
 - 10 sample bookings with different service types
 - Test customers for booking relationships
 
