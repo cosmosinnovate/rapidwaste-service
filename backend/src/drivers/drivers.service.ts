@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Driver, DriverDocument } from '../database/schemas/driver.schema';
@@ -15,23 +15,34 @@ export class DriversService {
     private usersService: UsersService,
   ) {}
 
-  async getDriverDashboard(driverId: string): Promise<any> {
-    const driver = await this.driverModel.findOne({ driverId }).populate('userId');
+  private validateTenantId(tenantId: string) {
+    if (!tenantId || !Types.ObjectId.isValid(tenantId)) {
+      throw new BadRequestException('Invalid or missing Tenant ID');
+    }
+  }
+
+  async getDriverDashboard(tenantId: string, driverId: string): Promise<any> {
+    this.validateTenantId(tenantId);
+    
+    const driver = await this.driverModel
+      .findOne({ driverId, tenantId: new Types.ObjectId(tenantId) })
+      .populate('userId');
     
     if (!driver) {
       throw new NotFoundException('Driver not found');
     }
 
-    // Get today's bookings (by preferred date or creation date)
+    // Get today's bookings
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const driverObjectId = new Types.ObjectId(driver.userId);
+    const driverObjectId = new Types.ObjectId(driver.userId as any);
 
     const todaysBookings = await this.bookingModel
       .find({
+        tenantId: new Types.ObjectId(tenantId),
         driverId: driverObjectId,
         $or: [
           { preferredDate: { $gte: today, $lt: tomorrow } },
@@ -42,14 +53,13 @@ export class DriversService {
       .sort({ createdAt: -1 })
       .exec();
 
-    // Calculate today's stats
     const completedToday = todaysBookings.filter(b => b.status === 'completed');
     const todaysEarnings = completedToday.reduce((sum, booking) => sum + (booking.actualPrice || booking.estimatedPrice), 0);
 
     return {
       driver: {
         id: driver.driverId,
-        name: `${driver.userId['firstName']} ${driver.userId['lastName']}`,
+        name: `${(driver.userId as any).firstName} ${(driver.userId as any).lastName}`,
         status: driver.status,
         rating: driver.rating,
         vehicle: driver.vehicleInfo,
@@ -65,56 +75,51 @@ export class DriversService {
     };
   }
 
-  async getDriverBookings(driverId: string, status?: string, date?: string): Promise<Booking[]> {
-    const driver = await this.driverModel.findOne({ driverId });
+  async getDriverBookings(tenantId: string, driverId: string, status?: string, date?: string): Promise<Booking[]> {
+    this.validateTenantId(tenantId);
+
+    const driver = await this.driverModel.findOne({ 
+      driverId, 
+      tenantId: new Types.ObjectId(tenantId) 
+    });
     
     if (!driver) {
       throw new NotFoundException('Driver not found');
     }
 
-    // Build the base query with driver filter
-    const query: any = { driverId: driver.userId };
+    const query: any = { 
+      tenantId: new Types.ObjectId(tenantId),
+      driverId: driver.userId 
+    };
     
-    // Add status filter if provided
     if (status && status !== 'all') {
       query.status = status;
     }
     
-    // Add date filter if provided
     if (date) {
       const startOfDay = new Date(date);
       startOfDay.setHours(0, 0, 0, 0);
       const endOfDay = new Date(date);
       endOfDay.setHours(23, 59, 59, 999);
       
-      console.log('Date filter debug:');
-      console.log('Input date:', date);
-      console.log('Start of day:', startOfDay);
-      console.log('End of day:', endOfDay);
-      
-      // Add date condition that matches either preferred date or creation date
       query.$or = [
         { preferredDate: { $gte: startOfDay, $lte: endOfDay } },
         { createdAt: { $gte: startOfDay, $lte: endOfDay } }
       ];
-      
-      console.log('Date query $or:', JSON.stringify(query.$or, null, 2));
     }
 
-    console.log('Final query:', JSON.stringify(query, null, 2));
-
-    const results = await this.bookingModel
+    return this.bookingModel
       .find(query)
       .populate('customerId', 'firstName lastName email phone')
       .sort({ createdAt: -1 })
       .exec();
-    
-    return results;
   }
 
-  async updateDriverStatus(driverId: string, status: string): Promise<Driver> {
+  async updateDriverStatus(tenantId: string, driverId: string, status: string): Promise<Driver> {
+    this.validateTenantId(tenantId);
+
     const driver = await this.driverModel.findOneAndUpdate(
-      { driverId },
+      { driverId, tenantId: new Types.ObjectId(tenantId) },
       { status, lastActiveAt: new Date() },
       { new: true }
     );
@@ -126,9 +131,11 @@ export class DriversService {
     return driver;
   }
 
-  async updateLocation(driverId: string, lat: number, lng: number): Promise<Driver> {
+  async updateLocation(tenantId: string, driverId: string, lat: number, lng: number): Promise<Driver> {
+    this.validateTenantId(tenantId);
+
     const driver = await this.driverModel.findOneAndUpdate(
-      { driverId },
+      { driverId, tenantId: new Types.ObjectId(tenantId) },
       {
         currentLocation: {
           lat,
@@ -147,63 +154,75 @@ export class DriversService {
     return driver;
   }
 
-  async getAvailableDrivers(): Promise<Driver[]> {
+  async getAvailableDrivers(tenantId: string): Promise<Driver[]> {
+    if (!tenantId || !Types.ObjectId.isValid(tenantId)) return [];
+
     return this.driverModel
-      .find({ status: 'available', isActive: true })
+      .find({ 
+        tenantId: new Types.ObjectId(tenantId),
+        status: 'available', 
+        isActive: true 
+      })
       .populate('userId', 'firstName lastName email phone')
       .exec();
   }
 
-  async getAllDrivers(): Promise<any[]> {
-    // Get all drivers from driver collection with user details
+  async getAllDrivers(tenantId: string): Promise<any[]> {
+    if (!tenantId || !Types.ObjectId.isValid(tenantId)) return [];
+
     const drivers = await this.driverModel
-      .find({ isActive: true })
+      .find({ 
+        tenantId: new Types.ObjectId(tenantId),
+        isActive: true 
+      })
       .populate('userId', 'firstName lastName email phone driverId role')
       .exec();
 
-    // Format the response to include user and driver details with proper typing
     return drivers.map(driver => {
-      const populatedDriver = driver as any; // Type assertion for populated document
-      const user = populatedDriver.userId as any; // Type assertion for populated user
+      const pDriver = driver as any;
+      const user = pDriver.userId as any;
       
       return {
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        driverId: user.driverId || populatedDriver.driverId,
-        status: populatedDriver.status,
-        vehicleInfo: populatedDriver.vehicleInfo,
-        workingHours: populatedDriver.workingHours,
-        workingDays: populatedDriver.workingDays,
-        isActive: populatedDriver.isActive,
-        createdAt: populatedDriver.createdAt,
-        updatedAt: populatedDriver.updatedAt,
+        _id: user?._id || pDriver._id,
+        firstName: user?.firstName || 'Unknown',
+        lastName: user?.lastName || 'Driver',
+        email: user?.email,
+        phone: user?.phone,
+        role: user?.role,
+        driverId: user?.driverId || pDriver.driverId,
+        status: pDriver.status,
+        vehicleInfo: pDriver.vehicleInfo,
+        workingHours: pDriver.workingHours,
+        workingDays: pDriver.workingDays,
+        isActive: pDriver.isActive,
+        createdAt: pDriver.createdAt,
+        updatedAt: pDriver.updatedAt,
       };
     });
   }
 
-  async createDriver(userData: any, driverData: any): Promise<Driver> {
-    // Generate driver ID first
-    const driverCount = await this.driverModel.countDocuments();
+  async createDriver(tenantId: string, userData: any, driverData: any): Promise<Driver> {
+    this.validateTenantId(tenantId);
+
+    const driverCount = await this.driverModel.countDocuments({ 
+      tenantId: new Types.ObjectId(tenantId) 
+    });
     const driverId = `D${String(driverCount + 1).padStart(4, '0')}`;
 
-    // Create user first using UsersService (which handles password hashing)
     const user = await this.usersService.create({
       ...userData,
+      tenantId: new Types.ObjectId(tenantId),
       role: 'driver',
       driverId: driverId,
     });
 
-    // Create driver profile
     const driver = new this.driverModel({
       ...driverData,
+      tenantId: new Types.ObjectId(tenantId),
       userId: user._id,
       driverId,
     });
 
     return driver.save();
   }
-} 
+}

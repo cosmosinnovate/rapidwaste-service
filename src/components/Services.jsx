@@ -1,77 +1,84 @@
+import { useTenant } from '../contexts/TenantContext';
+
 const Services = () => {
+  const { tenant } = useTenant();
+  
   const services = [
     {
       id: 'regular',
-      name: 'Regular Trash Pickup',
-      price: '$45',
-      priceNote: 'Base rate',
+      name: 'Standard Move & Clear',
+      price: `$${tenant?.settings?.basePriceRegular || 800}`,
+      priceNote: 'Starting at',
       icon: (
         <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
         </svg>
       ),
-      description: 'Scheduled pickup for regular household waste when your standard service is unavailable.',
+      description: 'The perfect solution for scheduled relocations and comprehensive space clearing.',
       features: [
-        'Up to 5 standard trash bags',
-        'Next business day pickup',
-        'Eco-friendly disposal',
-        'SMS confirmation',
-        'Professional drivers'
+        'Professional moving team',
+        'Standard box & item hauling',
+        'Responsible item disposal',
+        'SMS status updates',
+        'Licensed & insured crew'
       ],
-      timeline: '24-48 hours',
+      timeline: 'Scheduled arrival',
       popular: false
     },
     {
       id: 'emergency',
-      name: 'Emergency Same-Day',
-      price: '$50',
-      priceNote: 'Base rate',
+      name: 'Priority Same-Day',
+      price: `$${tenant?.settings?.basePriceEmergency || 1200}`,
+      priceNote: 'Starting at',
       icon: (
         <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.732 18.5c-.77.833-.192 2.5 1.732 2.5z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
       ),
-      description: 'Urgent same-day pickup for emergency situations and critical waste removal needs.',
+      description: 'Urgent relocation or clearing needs? Our priority team is ready for immediate deployment.',
       features: [
-        'Same-day pickup guaranteed',
-        'Up to 5 standard trash bags',
-        'Priority scheduling',
-        'Real-time tracking',
-        '24/7 emergency hotline',
-        'Crisis response team'
+        'Guaranteed same-day service',
+        'Priority dispatching',
+        'Complete packing & clearing',
+        'Real-time truck tracking',
+        '24/7 priority support',
+        'Elite relocation team'
       ],
       timeline: 'Within 4 hours',
       popular: true
     },
     {
       id: 'bulk',
-      name: 'Bulk Item Removal',
-      price: '$79',
-      priceNote: 'Base rate',
+      name: 'Heavy Furniture & Bulk',
+      price: `$${tenant?.settings?.basePriceBulk || 450}`,
+      priceNote: 'Starting at',
       icon: (
         <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
         </svg>
       ),
-      description: 'Heavy lifting and eco-disposal included. Includes 1 bulky item or up to 100 lbs.',
+      description: 'Expert transport or disposal for oversized items, pianos, and heavy machinery.',
       features: [
-        '24-72 hour pickup',
-        'Heavy lifting service included',
-        'Eco-friendly disposal',
-        '1 bulky item or up to 100 lbs',
-        'Professional crew',
-        'Load & haul included'
+        'Specialized heavy lifting',
+        'Multi-crew coordination',
+        'Safe transport guarantee',
+        'Eco-disposal for large items',
+        'Professional equipment',
+        'Complete load & haul'
       ],
       addOns: [
-        'Extra bulky item: +$35 each',
-        'Large load over 100 lbs: +$45',
-        'Yard waste (bags over 5): +$5 per bag'
+        'Additional heavy item: +$150 each',
+        'Oversized load (100lb+): +$250',
+        'Extra-mile transport: Custom quote'
       ],
       timeline: '24-72 hours',
       popular: false,
       customQuote: true
     }
   ];
+
+  const servicesTitle = tenant?.content?.servicesTitle || "Relocation & Clearing Solutions";
+  const servicesSubtitle = tenant?.content?.servicesSubtitle || "Top-tier moving and disposal services tailored to your needs. Transparent pricing and elite care for every item we handle.";
 
   return (
     <section id="services" className="py-20 bg-white">
@@ -80,192 +87,123 @@ const Services = () => {
         <div className="text-center mb-16">
           <div className="inline-flex items-center space-x-2 bg-primary-100 text-primary-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
             <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span>Professional Services</span>
+            <span>Elite Services</span>
           </div>
           
           <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-            Emergency Waste <span className="text-gradient">Solutions</span>
+            {servicesTitle.includes('&') ? (
+              <>
+                {servicesTitle.split('&')[0]} & <span className="text-gradient">{servicesTitle.split('&')[1]}</span>
+              </>
+            ) : servicesTitle}
           </h2>
           
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Professional waste management services designed to address the current crisis. 
-            Dynamic pricing based on bag count and service urgency.
+            {servicesSubtitle}
           </p>
         </div>
 
         {/* Services Grid */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           {services.map((service) => (
-            <div key={service.id} className={`service-card relative ${service.popular ? 'ring-2 ring-emergency-500' : ''}`}>
+            <div 
+              key={service.id}
+              className={`relative bg-white rounded-2xl p-8 shadow-lg border-2 transition-all duration-300 hover:shadow-xl ${
+                service.popular ? 'border-primary-500 scale-105 z-10' : 'border-transparent'
+              }`}
+            >
               {service.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-emergency-500 text-white px-4 py-1 rounded-full text-sm font-medium">
-                    Most Popular
-                  </span>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary-500 text-white px-4 py-1 rounded-full text-sm font-bold">
+                  Most Popular
                 </div>
               )}
               
-              <div className="flex items-center space-x-3 mb-6">
-                <div className={`p-3 rounded-lg ${service.popular ? 'bg-emergency-100 text-emergency-600' : 'bg-primary-100 text-primary-600'}`}>
+              <div className="mb-6">
+                <div className="bg-primary-50 w-16 h-16 rounded-xl flex items-center justify-center text-primary-600 mb-4">
                   {service.icon}
                 </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">{service.name}</h3>
-                  <p className="text-sm text-gray-600">{service.timeline}</p>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <div className="flex items-baseline space-x-2 mb-2">
+                <h3 className="text-xl font-bold text-gray-900">{service.name}</h3>
+                <div className="mt-2 flex items-baseline">
                   <span className="text-3xl font-bold text-gray-900">{service.price}</span>
-                  <span className="text-gray-600">{service.priceNote}</span>
+                  <span className="ml-1 text-sm text-gray-500">{service.priceNote}</span>
                 </div>
-                <p className="text-gray-600">{service.description}</p>
               </div>
 
-              <ul className="space-y-3 mb-6">
-                {service.features.map((feature, index) => (
-                  <li key={index} className="flex items-center space-x-3">
-                    <svg className="h-5 w-5 text-success-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              <p className="text-gray-600 mb-6 text-sm leading-relaxed">
+                {service.description}
+              </p>
+
+              <ul className="space-y-3 mb-8">
+                {service.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start text-sm text-gray-700">
+                    <svg className="h-5 w-5 text-success-500 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span className="text-gray-700">{feature}</span>
+                    {feature}
                   </li>
                 ))}
               </ul>
 
-              {service.addOns && (
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                    <span className="mr-2">🔁</span>
-                    Add-ons:
-                  </h4>
-                  <ul className="space-y-2">
-                    {service.addOns.map((addon, index) => (
-                      <li key={index} className="text-sm text-gray-600 flex items-start">
-                        <span className="mr-2 mt-1">•</span>
-                        <span>{addon}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  {service.customQuote && (
-                    <div className="mt-3 pt-3 border-t border-gray-200">
-                      <p className="text-sm text-gray-600 flex items-center">
-                        <span className="mr-2">🔧</span>
-                        Need more than 3 items? Free quote available.
-                      </p>
-                    </div>
-                  )}
+              <div className="pt-6 border-t border-gray-100 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Timeline</p>
+                  <p className="text-sm font-semibold text-gray-900">{service.timeline}</p>
                 </div>
-              )}
-
-              <div className="space-y-3">
-                <button className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors duration-200 ${
-                  service.popular 
-                    ? 'bg-emergency-600 hover:bg-emergency-700 text-white' 
-                    : 'bg-primary-600 hover:bg-primary-700 text-white'
-                }`}>
-                  📲 Book {service.name}
-                </button>
-                
-                {service.customQuote && (
-                  <button className="w-full py-2 px-6 rounded-lg font-medium border-2 border-gray-300 hover:border-primary-500 text-gray-700 hover:text-primary-600 transition-colors duration-200">
-                    Ask for Custom Quote
-                  </button>
-                )}
+                <a 
+                  href="#booking" 
+                  className={`px-6 py-2 rounded-lg font-bold text-sm transition-colors ${
+                    service.popular 
+                      ? 'bg-primary-600 text-white hover:bg-primary-700' 
+                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                  }`}
+                >
+                  Book Now
+                </a>
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Bulk Item Tips */}
-        <div className="bg-gradient-to-br from-primary-50 to-blue-50 rounded-2xl p-8 mb-16">
-          <div className="text-center mb-8">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">💡 Bulk Item Removal Guide</h3>
-            <p className="text-gray-600 max-w-3xl mx-auto">
-              Make your bulk pickup smooth and cost-effective with these helpful tips.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                <span className="mr-2">📏</span>
-                Item Examples
-              </h4>
-              <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Recliner = 1 item</li>
-                <li>• Dining table = 1-2 items</li>
-                <li>• Washer + Dryer = 2 items</li>
-                <li>• Mattress/Box spring = 1 item each</li>
-              </ul>
-            </div>
-            
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                <span className="mr-2">📷</span>
-                Get Quick Quotes
-              </h4>
-              <p className="text-sm text-gray-600 mb-3">
-                Send us a photo for instant pricing on large or unusual items.
-              </p>
-              <button className="text-primary-600 hover:text-primary-700 text-sm font-medium">
-                📲 Send Photo Quote →
-              </button>
-            </div>
-            
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                <span className="mr-2">⚠️</span>
-                Not Included
-              </h4>
-              <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Hazardous waste</li>
-                <li>• Demolition work</li>
-                <li>• Items over 300 lbs</li>
-                <li>• Liquids or chemicals</li>
-              </ul>
-            </div>
-          </div>
         </div>
 
         {/* Pricing Information */}
         <div className="bg-gray-50 rounded-2xl p-8">
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Dynamic Pricing</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Relocation Estimates</h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                  <span className="text-gray-700">1-5 bags</span>
-                  <span className="font-semibold text-gray-900">Base rate</span>
+                  <span className="text-gray-700">Studio / 1-Bedroom (Local)</span>
+                  <span className="font-semibold text-gray-900">Avg. $800 - $1,200</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                  <span className="text-gray-700">6-10 bags</span>
-                  <span className="font-semibold text-gray-900">+$5</span>
+                  <span className="text-gray-700">2-Bedroom Home (Local)</span>
+                  <span className="font-semibold text-gray-900">Avg. $1,500 - $2,800</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                  <span className="text-gray-700">11+ bags</span>
-                  <span className="font-semibold text-gray-900">+$10</span>
+                  <span className="text-gray-700">3-Bedroom+ Home (Local)</span>
+                  <span className="font-semibold text-gray-900">Avg. $3,500 - $6,500+</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-gray-700">Special disposal fees</span>
-                  <span className="font-semibold text-gray-900">As applicable</span>
+                  <span className="text-gray-700">Long Distance (100+ miles)</span>
+                  <span className="font-semibold text-primary-600">Avg. $4,500 - $15,000+</span>
                 </div>
               </div>
+              <p className="text-xs text-gray-500 mt-4">
+                *Estimates based on industry benchmarks. Final price includes labor, travel, and disposal fees.
+              </p>
             </div>
             
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Why Choose RapidWaste?</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">The {tenant?.name || 'Rapid'} Advantage</h3>
               <div className="space-y-3">
                 <div className="flex items-start space-x-3">
                   <svg className="h-6 w-6 text-success-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <div>
-                    <span className="font-semibold text-gray-900">Crisis Response Specialists</span>
-                    <p className="text-gray-600 text-sm">Addressing worker shortage with immediate solutions</p>
+                    <span className="font-semibold text-gray-900">Transparent Hourly Rates</span>
+                    <p className="text-gray-600 text-sm">No hidden "inventory" fees for local moves</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
@@ -273,8 +211,8 @@ const Services = () => {
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <div>
-                    <span className="font-semibold text-gray-900">Professional & Reliable</span>
-                    <p className="text-gray-600 text-sm">Licensed, insured, and background-checked drivers</p>
+                    <span className="font-semibold text-gray-900">White-Glove Care</span>
+                    <p className="text-gray-600 text-sm">Licensed, insured, and background-checked specialists</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
@@ -282,8 +220,8 @@ const Services = () => {
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <div>
-                    <span className="font-semibold text-gray-900">Transparent Pricing</span>
-                    <p className="text-gray-600 text-sm">No hidden fees, upfront pricing calculator</p>
+                    <span className="font-semibold text-gray-900">All-In-One Solution</span>
+                    <p className="text-gray-600 text-sm">We move what you keep & clear what you don't</p>
                   </div>
                 </div>
               </div>
@@ -295,4 +233,4 @@ const Services = () => {
   );
 };
 
-export default Services; 
+export default Services;

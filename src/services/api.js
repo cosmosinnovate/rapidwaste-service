@@ -1,10 +1,11 @@
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = 'http://127.0.0.1:3001';
 
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
     this.authToken = null;
     this.refreshToken = null;
+    this.tenantId = null;
     this.isRefreshing = false;
     this.failedQueue = [];
   }
@@ -15,6 +16,10 @@ class ApiService {
 
   setRefreshToken(token) {
     this.refreshToken = token;
+  }
+
+  setTenantId(id) {
+    this.tenantId = id;
   }
 
   clearAuthToken() {
@@ -69,8 +74,8 @@ class ApiService {
       this.setRefreshToken(refresh_token);
 
       // Update localStorage
-      localStorage.setItem('rapidwaste_token', access_token);
-      localStorage.setItem('rapidwaste_refresh_token', refresh_token);
+      localStorage.setItem('rapidmove_token', access_token);
+      localStorage.setItem('rapidmove_refresh_token', refresh_token);
 
       // Process the queue with the new token
       this.processQueue(null, access_token);
@@ -79,9 +84,9 @@ class ApiService {
     } catch (error) {
       // Refresh failed, clear tokens and process queue with error
       this.clearAuthToken();
-      localStorage.removeItem('rapidwaste_token');
-      localStorage.removeItem('rapidwaste_refresh_token');
-      localStorage.removeItem('rapidwaste_user');
+      localStorage.removeItem('rapidmove_token');
+      localStorage.removeItem('rapidmove_refresh_token');
+      localStorage.removeItem('rapidmove_user');
       
       this.processQueue(error, null);
       
@@ -108,11 +113,34 @@ class ApiService {
     if (this.authToken) {
       headers.Authorization = `Bearer ${this.authToken}`;
     }
+
+    // Add tenant ID to headers for all requests
+    if (this.tenantId) {
+      headers['x-tenant-id'] = this.tenantId;
+    }
     
-    const config = {
+    // Auto-inject tenantId into body for specific public/auth mutations
+    let config = {
       headers,
       ...options,
     };
+
+    const isCreationOrAuth = endpoint === '/bookings' || endpoint.includes('/auth/');
+    
+    if (this.tenantId && 
+        config.method?.toUpperCase() === 'POST' && 
+        isCreationOrAuth &&
+        !endpoint.includes('/tenants/register')) {
+      try {
+        const body = JSON.parse(config.body || '{}');
+        if (!body.tenantId) {
+          body.tenantId = this.tenantId;
+          config.body = JSON.stringify(body);
+        }
+      } catch (e) {
+        // Body might not be JSON or already handled
+      }
+    }
 
     try {
       const response = await fetch(url, config);
@@ -181,10 +209,10 @@ class ApiService {
   }
 
   // Authentication methods
-  async login(email, password) {
+  async login(email, password, tenantId) {
     return this.request('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, tenantId }),
     });
   }
 
@@ -320,6 +348,14 @@ class ApiService {
 
   async getAllUsers() {
     return this.request('/users');
+  }
+
+  // Tenant methods
+  async updateTenant(tenantId, data) {
+    return this.request(`/tenants/${tenantId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
   }
 
   // Payment methods

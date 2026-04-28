@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { DriversModule } from './drivers/drivers.module';
 import { PaymentsModule } from './payments/payments.module';
+import { TenantsModule } from './tenants/tenants.module';
 import { BookingsGateway } from './gateways/bookings.gateway';
 
 
@@ -15,13 +16,14 @@ import { BookingsGateway } from './gateways/bookings.gateway';
       isGlobal: true,
     }),
     MongooseModule.forRoot(
-      process.env.MONGODB_URI || 'mongodb://localhost:27017/rapidwaste'
+      process.env.MONGODB_URI || 'mongodb://localhost:27017/rapidmoveclear'
     ),
     AuthModule,
     UsersModule,
     BookingsModule,
     DriversModule,
     PaymentsModule,
+    TenantsModule,
   ],
   providers: [BookingsGateway],
 })

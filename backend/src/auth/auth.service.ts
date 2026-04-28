@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { LoginDto, RegisterDto } from '../common/dto/auth.dto';
 import { UserDocument } from '../database/schemas/user.schema';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +17,7 @@ export class AuthService {
       email: user.email, 
       sub: user.id, 
       role: user.role,
+      tenantId: user.tenantId,
       firstName: user.firstName,
       lastName: user.lastName,
     };
@@ -29,6 +31,7 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
+        tenantId: user.tenantId,
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
@@ -38,13 +41,15 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const user = await this.usersService.validateUser(
+    // 1. Find user scoped by tenant
+    const user = await this.usersService.findByEmailAndTenant(
       loginDto.email,
-      loginDto.password,
+      loginDto.tenantId,
     );
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+    // 2. Validate user existence and password
+    if (!user || !(await bcrypt.compare(loginDto.password, user.password))) {
+      throw new UnauthorizedException('Invalid email or password for this portal');
     }
 
     await this.usersService.updateLastLogin(user.id);
@@ -59,7 +64,7 @@ export class AuthService {
       throw new UnauthorizedException('Email already exists');
     }
 
-    const user = await this.usersService.create(registerDto);
+    const user = await this.usersService.create(registerDto as any);
     
     return this.generateTokens(user);
   }
